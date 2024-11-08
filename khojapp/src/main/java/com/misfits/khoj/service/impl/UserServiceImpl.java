@@ -7,12 +7,23 @@ import com.misfits.khoj.model.UserProfile;
 import com.misfits.khoj.service.UserService;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
+
+  public String getCurrentJwtUserId() {
+    Jwt jwt = getJwtFromAuthentication();
+    if (jwt == null || !jwt.hasClaim("sub")) {
+      throw new UserProfileException("User ID not found in token.");
+    }
+    return jwt.getClaim("sub");
+  }
 
   public UserProfile getUserProfile(OAuth2User principal) {
     try {
@@ -31,6 +42,7 @@ public class UserServiceImpl implements UserService {
       // Create and log the UserProfile
       UserProfile userProfile = new UserProfile(attributes);
       log.info("User profile retrieved: {}", userProfile);
+
       return userProfile;
 
     } catch (UserProfileException ex) {
@@ -51,5 +63,18 @@ public class UserServiceImpl implements UserService {
       log.error(errorMessage);
       throw new MissingUserAttributeException(errorMessage);
     }
+  }
+
+  private Jwt getJwtFromAuthentication() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null) {
+      throw new UserNotAuthenticatedException("No authentication found in security context.");
+    }
+
+    if (!(authentication.getPrincipal() instanceof Jwt jwt)) {
+      throw new UserNotAuthenticatedException("Invalid token: Principal is not a JWT.");
+    }
+
+    return jwt;
   }
 }
