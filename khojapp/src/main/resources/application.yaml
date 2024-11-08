@@ -8,6 +8,9 @@ spring:
     max-http-form-post-size: 104857600
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://cognito-idp.${aws.region}.amazonaws.com/${aws.service.cognito.user-pool-id}
       client:
         registration:
           cognito:
@@ -17,7 +20,7 @@ spring:
         provider:
           cognito:
             issuer-uri: https://cognito-idp.${aws.region}.amazonaws.com/${aws.service.cognito.user-pool-id}
-            jwt-uri: https://cognito-idp.${aws.region}.amazonaws.com/${aws.service.cognito.user-pool-id}/.well-known/jwks.json
+
   servlet:
     multipart:
       enabled: true
