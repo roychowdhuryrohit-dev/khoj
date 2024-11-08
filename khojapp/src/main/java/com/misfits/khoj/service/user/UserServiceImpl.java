@@ -1,9 +1,9 @@
-package com.misfits.khoj.service.file;
+package com.misfits.khoj.service.user;
 
 import com.misfits.khoj.exceptions.userexceptions.MissingUserAttributeException;
 import com.misfits.khoj.exceptions.userexceptions.UserNotAuthenticatedException;
 import com.misfits.khoj.exceptions.userexceptions.UserProfileException;
-import com.misfits.khoj.model.UserProfile;
+import com.misfits.khoj.model.user.UserProfile;
 import com.misfits.khoj.service.UserService;
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +17,8 @@ public class UserServiceImpl implements UserService {
 
   public String getUserId(OAuth2User principal) {
     if (principal == null) {
-      throw new UserNotAuthenticatedException("User is not authenticated.");
+      throw new UserNotAuthenticatedException(
+          "User is not authenticated, Principal is null in getUserId.");
     }
 
     return (String)
@@ -33,7 +34,8 @@ public class UserServiceImpl implements UserService {
 
       // Check if the user is authenticated
       if (principal == null) {
-        throw new UserNotAuthenticatedException("User is not authenticated.");
+        throw new UserNotAuthenticatedException(
+            "User is not authenticated, Principal is null in getUserProfile.");
       }
 
       // Retrieve and validate required attributes

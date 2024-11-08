@@ -1,4 +1,4 @@
-package com.misfits.khoj.service.user;
+package com.misfits.khoj.service.file;
 
 import static com.misfits.khoj.constants.ApplicationConstants.S3_BASE_URL;
 

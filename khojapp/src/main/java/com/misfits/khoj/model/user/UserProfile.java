@@ -1,4 +1,4 @@
-package com.misfits.khoj.model;
+package com.misfits.khoj.model.user;
 
 import static com.misfits.khoj.constants.ApplicationConstants.*;
 
