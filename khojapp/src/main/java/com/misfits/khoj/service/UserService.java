@@ -6,7 +6,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface UserService {
-  String getCurrentJwtUserId();
 
   UserProfile getUserProfile(OAuth2User principal);
+
+  String getUserId(OAuth2User principal);
 }
