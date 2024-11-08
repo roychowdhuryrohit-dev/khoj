@@ -1,10 +1,8 @@
 package com.misfits.khoj.config;
 
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-@Getter
 @Configuration
 public class AwsConfig {
 
@@ -31,4 +29,36 @@ public class AwsConfig {
 
   @Value("${aws.service.cognito.user-pool-id}")
   String cognitoUserPoolId;
+
+  public String getAccessKey() {
+    return accessKey;
+  }
+
+  public String getAwsRegion() {
+    return awsRegion;
+  }
+
+  public String getSecretAccessKey() {
+    return secretAccessKey;
+  }
+
+  public String getS3BucketName() {
+    return s3BucketName;
+  }
+
+  public String getS3Region() {
+    return s3Region;
+  }
+
+  public String getS3BaseDirectory() {
+    return s3BaseDirectory;
+  }
+
+  public String getDynamoDbRegion() {
+    return dynamoDbRegion;
+  }
+
+  public String getCognitoUserPoolId() {
+    return cognitoUserPoolId;
+  }
 }

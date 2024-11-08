@@ -7,4 +7,6 @@ public class ApplicationConstants {
   public static final String NAME = "name";
   public static final String LOGIN_PAGE = "/oauth2/authorization/cognito";
   public static final String S3_BASE_URL = "https://%s.s3.amazonaws.com/%s";
+  public static final String SPACE_REGEX = "\\s+";
+  public static final String UNDERSCORE = "_";
 }
