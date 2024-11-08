@@ -23,6 +23,6 @@ public class ListUserFilesResponse extends BaseUserProfile {
 
   @Override
   public String toString() {
-    return "UserFilesResponse{" + "files=" + files + '}';
+    return super.toString() + "files=" + files + '\'';
   }
 }

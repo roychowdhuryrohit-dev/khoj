@@ -36,13 +36,6 @@ public class FileUploadResponse extends BaseUserProfile {
 
   @Override
   public String toString() {
-    return "SingleFileUploadResponse{"
-        + "fileName='"
-        + fileName
-        + '\''
-        + ", fileUrl='"
-        + fileUrl
-        + '\''
-        + '}';
+    return super.toString() + "fileName='" + fileName + '\'' + ", fileUrl='" + fileUrl + '\'';
   }
 }
