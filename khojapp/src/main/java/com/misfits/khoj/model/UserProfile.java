@@ -3,13 +3,13 @@ package com.misfits.khoj.model;
 import static com.misfits.khoj.constants.ApplicationConstants.*;
 
 import java.util.Map;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
-@Data
 @Getter
 @Setter
+@Component
 public class UserProfile {
 
   String sub;
@@ -25,5 +25,22 @@ public class UserProfile {
             ? (Boolean) attributes.get(EMAIL_VERIFIED)
             : Boolean.parseBoolean((String) attributes.get(EMAIL_VERIFIED));
     this.name = (String) attributes.get(NAME);
+  }
+
+  @Override
+  public String toString() {
+    return "UserProfile{"
+        + "userId='"
+        + sub
+        + '\''
+        + ", email='"
+        + email
+        + '\''
+        + ", emailVerified="
+        + emailVerified
+        + ", name='"
+        + name
+        + '\''
+        + '}';
   }
 }
