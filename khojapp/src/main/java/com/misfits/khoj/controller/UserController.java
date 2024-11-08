@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
-public class ApplicationControllers {
+public class UserController {
 
   @Autowired UserService userService;
 
   @GetMapping("/user")
   public UserProfile getUserProfileFromAuth(@AuthenticationPrincipal OAuth2User principal) {
+    // CHeck if exisits in dynamo db else put in dyanamodb
+    // userid is availabe in JWT
     return userService.getUserProfile(principal);
   }
 }
