@@ -1,4 +1,4 @@
-package com.misfits.khoj.service.impl;
+package com.misfits.khoj.service.file;
 
 import com.misfits.khoj.exceptions.userexceptions.MissingUserAttributeException;
 import com.misfits.khoj.exceptions.userexceptions.UserNotAuthenticatedException;
@@ -6,23 +6,26 @@ import com.misfits.khoj.exceptions.userexceptions.UserProfileException;
 import com.misfits.khoj.model.UserProfile;
 import com.misfits.khoj.service.UserService;
 import java.util.Map;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
-  public String getCurrentJwtUserId() {
-    Jwt jwt = getJwtFromAuthentication();
-    if (jwt == null || !jwt.hasClaim("sub")) {
-      throw new UserProfileException("User ID not found in token.");
+  public String getUserId(OAuth2User principal) {
+    if (principal == null) {
+      throw new UserNotAuthenticatedException("User is not authenticated.");
     }
-    return jwt.getClaim("sub");
+
+    return (String)
+        Optional.ofNullable(principal.getAttribute("sub"))
+            .orElseThrow(
+                () ->
+                    new MissingUserAttributeException(
+                        "User ID (sub) attribute is missing in the OAuth2User principal."));
   }
 
   public UserProfile getUserProfile(OAuth2User principal) {
@@ -63,18 +66,5 @@ public class UserServiceImpl implements UserService {
       log.error(errorMessage);
       throw new MissingUserAttributeException(errorMessage);
     }
-  }
-
-  private Jwt getJwtFromAuthentication() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null) {
-      throw new UserNotAuthenticatedException("No authentication found in security context.");
-    }
-
-    if (!(authentication.getPrincipal() instanceof Jwt jwt)) {
-      throw new UserNotAuthenticatedException("Invalid token: Principal is not a JWT.");
-    }
-
-    return jwt;
   }
 }

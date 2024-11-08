@@ -3,12 +3,8 @@ package com.misfits.khoj.model;
 import static com.misfits.khoj.constants.ApplicationConstants.*;
 
 import java.util.Map;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-@Getter
-@Setter
 @Component
 public class UserProfile {
 
@@ -42,5 +38,37 @@ public class UserProfile {
         + name
         + '\''
         + '}';
+  }
+
+  public String getSub() {
+    return sub;
+  }
+
+  public void setSub(String sub) {
+    this.sub = sub;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Boolean getEmailVerified() {
+    return emailVerified;
+  }
+
+  public void setEmailVerified(Boolean emailVerified) {
+    this.emailVerified = emailVerified;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
   }
 }
