@@ -30,6 +30,7 @@ public class FileUploadResponse extends BaseUserProfile {
   public FileUploadResponse() {}
 
   public FileUploadResponse(String fileName, String fileUrl) {
+    super();
     this.fileName = fileName;
     this.fileUrl = fileUrl;
   }

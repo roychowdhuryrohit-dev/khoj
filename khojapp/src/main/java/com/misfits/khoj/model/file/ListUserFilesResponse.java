@@ -10,6 +10,7 @@ public class ListUserFilesResponse extends BaseUserProfile {
   public ListUserFilesResponse() {}
 
   public ListUserFilesResponse(Map<String, String> files) {
+    super();
     this.files = files;
   }
 

@@ -11,6 +11,7 @@ public class MultipleFileUploadResponse extends BaseUserProfile {
   public MultipleFileUploadResponse() {}
 
   public MultipleFileUploadResponse(List<FileUploadResponse> files, int totalFiles) {
+    super();
     this.files = files;
     this.totalFiles = totalFiles;
   }
