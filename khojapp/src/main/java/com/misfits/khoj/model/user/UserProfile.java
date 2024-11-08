@@ -1,24 +1,19 @@
-package com.misfits.khoj.model;
+package com.misfits.khoj.model.user;
 
 import static com.misfits.khoj.constants.ApplicationConstants.*;
 
 import java.util.Map;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-@Getter
-@Setter
 @Component
-public class UserProfile {
+public class UserProfile extends BaseUserProfile {
 
-  String sub;
   String email;
   Boolean emailVerified;
   String name;
 
   public UserProfile(Map<String, Object> attributes) {
-    this.sub = (String) attributes.get(SUB);
+    super.setUserId((String) attributes.get(SUB));
     this.email = (String) attributes.get(EMAIL);
     this.emailVerified =
         attributes.get(EMAIL_VERIFIED) instanceof Boolean
@@ -29,18 +24,38 @@ public class UserProfile {
 
   @Override
   public String toString() {
-    return "UserProfile{"
-        + "userId='"
-        + sub
-        + '\''
-        + ", email='"
+    return super.toString()
+        + "email='"
         + email
         + '\''
         + ", emailVerified="
         + emailVerified
         + ", name='"
         + name
-        + '\''
-        + '}';
+        + '\'';
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Boolean getEmailVerified() {
+    return emailVerified;
+  }
+
+  public void setEmailVerified(Boolean emailVerified) {
+    this.emailVerified = emailVerified;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
   }
 }

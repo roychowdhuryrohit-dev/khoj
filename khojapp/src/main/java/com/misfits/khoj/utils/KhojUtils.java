@@ -1,5 +1,8 @@
 package com.misfits.khoj.utils;
 
+import static com.misfits.khoj.constants.ApplicationConstants.SPACE_REGEX;
+import static com.misfits.khoj.constants.ApplicationConstants.UNDERSCORE;
+
 import com.misfits.khoj.exceptions.fileexceptions.FileStandardizationException;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +13,6 @@ public class KhojUtils {
     if (fileName == null) {
       throw new FileStandardizationException("File name cannot be null");
     }
-    return fileName.replaceAll("\\s+", "_"); // Replace spaces with underscores
+    return fileName.replaceAll(SPACE_REGEX, UNDERSCORE); // Replace spaces with underscores
   }
 }

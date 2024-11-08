@@ -1,6 +1,6 @@
 package com.misfits.khoj.controller;
 
-import com.misfits.khoj.model.UserProfile;
+import com.misfits.khoj.model.user.UserProfile;
 import com.misfits.khoj.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
