@@ -1,25 +1,16 @@
 package com.misfits.khoj.model.file;
 
+import com.misfits.khoj.model.user.BaseUserProfile;
 import java.util.Map;
 
-public class ListUserFilesResponse {
+public class ListUserFilesResponse extends BaseUserProfile {
 
-  private String userId;
   private Map<String, String> files; // Map of fileKey to fileUrl
 
   public ListUserFilesResponse() {}
 
-  public ListUserFilesResponse(String userId, Map<String, String> files) {
-    this.userId = userId;
+  public ListUserFilesResponse(Map<String, String> files) {
     this.files = files;
-  }
-
-  public String getUserId() {
-    return userId;
-  }
-
-  public void setUserId(String userId) {
-    this.userId = userId;
   }
 
   public Map<String, String> getFiles() {
@@ -32,6 +23,6 @@ public class ListUserFilesResponse {
 
   @Override
   public String toString() {
-    return "UserFilesResponse{" + "userId='" + userId + '\'' + ", files=" + files + '}';
+    return "UserFilesResponse{" + "files=" + files + '}';
   }
 }
