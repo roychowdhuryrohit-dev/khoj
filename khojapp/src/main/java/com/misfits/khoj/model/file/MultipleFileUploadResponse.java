@@ -17,7 +17,13 @@ public class MultipleFileUploadResponse extends BaseUserProfile {
 
   @Override
   public String toString() {
-    return "MultiFileUploadResponse{" + "TotalFiles=" + totalFiles + ", files=" + files + '}';
+    return super.toString()
+        + "MultiFileUploadResponse{"
+        + "TotalFiles="
+        + totalFiles
+        + ", files="
+        + files
+        + '}';
   }
 
   public int getTotalFiles() {
