@@ -13,6 +13,6 @@ public abstract class BaseUserProfile {
 
   @Override
   public String toString() {
-    return "userId='" + userId + +'\'';
+    return "userId='" + userId + "', '";
   }
 }
