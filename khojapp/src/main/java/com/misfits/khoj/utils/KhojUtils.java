@@ -3,14 +3,12 @@ package com.misfits.khoj.utils;
 import static com.misfits.khoj.constants.ApplicationConstants.SPACE_REGEX;
 import static com.misfits.khoj.constants.ApplicationConstants.UNDERSCORE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.misfits.khoj.exceptions.fileexceptions.FileStandardizationException;
+import com.misfits.khoj.exceptions.file.FileStandardizationException;
 import com.misfits.khoj.exceptions.persitence.UserDataSerializationException;
-import com.misfits.khoj.exceptions.userexceptions.MissingUserAttributeException;
-import com.misfits.khoj.exceptions.userexceptions.UserProfileException;
+import com.misfits.khoj.exceptions.user.MissingUserAttributeException;
+import com.misfits.khoj.exceptions.user.UserProfileException;
 import com.misfits.khoj.model.persistence.UserProfileDetails;
 import java.util.HashMap;
 import java.util.List;
@@ -45,18 +43,6 @@ public class KhojUtils {
       return userId;
     } catch (UserProfileException e) {
       throw new MissingUserAttributeException("User ID supplied cannot be null", e);
-    }
-  }
-
-  public static JsonNode stringToJsonNode(String userId, String jsonString) {
-    try {
-      return objectMapper.readTree(jsonString);
-    } catch (JsonProcessingException e) {
-      log.error(
-          "Failed to serialize UserProfileDetails to Object for userId {}: {}",
-          userId,
-          e.getMessage());
-      throw new UserDataSerializationException("Error deserializing JSON string to JsonNode", e);
     }
   }
 
