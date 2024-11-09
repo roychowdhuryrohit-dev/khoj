@@ -16,42 +16,26 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-  // Handle ResourceNotFoundException
-  @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleResourceNotFound(
-      ResourceNotFoundException ex, HttpServletRequest request) {
-    return buildErrorResponse(
-        HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request.getRequestURI());
-  }
-
-  // Handle InvalidRequestException
-  @ExceptionHandler(InvalidRequestException.class)
-  public ResponseEntity<ErrorResponse> handleInvalidRequest(
-      InvalidRequestException ex, HttpServletRequest request) {
-    return buildErrorResponse(
-        HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request.getRequestURI());
-  }
-
-  // Handle UserNotAuthenticatedException
   @ExceptionHandler(UserNotAuthenticatedException.class)
   public ResponseEntity<ErrorResponse> handleUserNotAuthenticated(
       UserNotAuthenticatedException ex, HttpServletRequest request) {
+    logger.error("UserNotAuthenticatedException occurred:", ex);
     return buildErrorResponse(
         HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage(), request.getRequestURI());
   }
 
-  // Handle MissingUserAttributeException
   @ExceptionHandler(MissingUserAttributeException.class)
   public ResponseEntity<ErrorResponse> handleMissingUserAttribute(
       MissingUserAttributeException ex, HttpServletRequest request) {
+    logger.error("MissingUserAttributeException occurred:", ex);
     return buildErrorResponse(
         HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request.getRequestURI());
   }
 
-  // Handle UserProfileException specifically
   @ExceptionHandler(UserProfileException.class)
   public ResponseEntity<ErrorResponse> handleUserProfileException(
       UserProfileException ex, HttpServletRequest request) {
+    logger.error("UserProfileException occurred:", ex);
     return buildErrorResponse(
         HttpStatus.INTERNAL_SERVER_ERROR,
         "User Profile Error",
@@ -62,6 +46,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(FileListingException.class)
   public ResponseEntity<ErrorResponse> handleFileListingException(
       FileListingException e, HttpServletRequest request) {
+    logger.error("FileListingException occurred:", e);
     return buildErrorResponse(
         HttpStatus.INTERNAL_SERVER_ERROR,
         "File Listing Error",
@@ -72,6 +57,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(FileUploadException.class)
   public ResponseEntity<ErrorResponse> handleFileUploadException(
       FileUploadException e, HttpServletRequest request) {
+    logger.error("FileUploadException occurred:", e);
     return buildErrorResponse(
         HttpStatus.INTERNAL_SERVER_ERROR,
         "File Upload Error",
@@ -82,6 +68,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleGenericException(
       Exception e, HttpServletRequest request) {
+    logger.error("Exception occurred:", e);
     return buildErrorResponse(
         HttpStatus.INTERNAL_SERVER_ERROR,
         "Internal Server Error",

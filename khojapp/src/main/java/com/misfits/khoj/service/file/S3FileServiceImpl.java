@@ -1,6 +1,7 @@
 package com.misfits.khoj.service.file;
 
 import static com.misfits.khoj.constants.ApplicationConstants.S3_BASE_URL;
+import static com.misfits.khoj.utils.KhojUtils.validateUserIdNotNull;
 
 import com.misfits.khoj.config.AwsConfig;
 import com.misfits.khoj.exceptions.fileexceptions.FileListingException;
@@ -9,6 +10,7 @@ import com.misfits.khoj.exceptions.fileexceptions.FileUploadException;
 import com.misfits.khoj.model.file.FileUploadResponse;
 import com.misfits.khoj.model.file.ListUserFilesResponse;
 import com.misfits.khoj.model.file.MultipleFileUploadResponse;
+import com.misfits.khoj.persistence.DynamoDbPersistenceService;
 import com.misfits.khoj.service.S3FileService;
 import com.misfits.khoj.utils.KhojUtils;
 import java.util.List;
@@ -31,9 +33,11 @@ public class S3FileServiceImpl implements S3FileService {
 
   @Autowired S3Client s3Client;
 
+  @Autowired DynamoDbPersistenceService dynamoDbPersistenceService;
+
   @Override
   public FileUploadResponse uploadFile(MultipartFile file, String userId) {
-
+    validateUserIdNotNull(userId);
     FileUploadResponse fileUploadResponse = new FileUploadResponse();
     String standardizedFileName;
 
@@ -81,6 +85,7 @@ public class S3FileServiceImpl implements S3FileService {
 
   @Override
   public MultipleFileUploadResponse uploadFiles(List<MultipartFile> files, String userId) {
+    validateUserIdNotNull(userId);
     log.info("Uploading Multiple Files into bucket {}", awsConfig.getS3BucketName());
     // List to store each file's upload response
     List<FileUploadResponse> fileResponses =
@@ -104,8 +109,8 @@ public class S3FileServiceImpl implements S3FileService {
 
   @Override
   public ListUserFilesResponse listUserFiles(String userId) {
+    validateUserIdNotNull(userId);
     String prefix = String.format("%s/%s/", awsConfig.getS3BaseDirectory(), userId);
-
     log.info(
         "Retrieving all files for user {} from bucket {}", userId, awsConfig.getS3BucketName());
 
