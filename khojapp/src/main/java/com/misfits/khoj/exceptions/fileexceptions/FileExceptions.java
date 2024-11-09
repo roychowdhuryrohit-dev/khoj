@@ -1,9 +1,7 @@
 package com.misfits.khoj.exceptions.fileexceptions;
 
-import lombok.Getter;
-
-@Getter
 public class FileExceptions extends RuntimeException {
+
   private final String errorCode;
 
   public FileExceptions(String message, String errorCode) {
@@ -14,6 +12,21 @@ public class FileExceptions extends RuntimeException {
   public FileExceptions(String message, String errorCode, Throwable cause) {
     super(message, cause);
     this.errorCode = errorCode;
+  }
+
+  public FileExceptions(String errorCode) {
+    super();
+    this.errorCode = errorCode;
+  }
+
+  public FileExceptions(Throwable cause, String errorCode) {
+    super(cause);
+    this.errorCode = errorCode;
+  }
+
+  public FileExceptions() {
+    super();
+    this.errorCode = "FILE_EXCEPTION";
   }
 
   public String getErrorCode() {

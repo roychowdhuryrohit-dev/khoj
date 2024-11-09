@@ -5,8 +5,11 @@ public class MissingUserAttributeException extends UserProfileException {
     super(message);
   }
 
-  // Constructor with message and cause
   public MissingUserAttributeException(String message, Throwable cause) {
-    super(message, cause);
+    super(message, String.valueOf(cause));
+  }
+
+  public MissingUserAttributeException(String message, String message1) {
+    super(message);
   }
 }

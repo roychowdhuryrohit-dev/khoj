@@ -47,17 +47,17 @@ public class UserServiceImpl implements UserService {
       // Create and log the UserProfile
       UserProfile userProfile = new UserProfile(attributes);
       log.info("User profile retrieved: {}", userProfile);
-
       return userProfile;
 
     } catch (UserProfileException ex) {
       log.error("Error retrieving user profile: {}", ex.getMessage());
-      throw new UserProfileException("Failed retrieving user profile details .", ex);
+      throw new UserProfileException(
+          "Failed retrieving user profile details .", String.valueOf(ex));
 
     } catch (Exception ex) {
       // Catch any unexpected exceptions
       log.error("An unexpected error occurred while retrieving user profile", ex);
-      throw new UserProfileException("An unexpected error occurred.", ex);
+      throw new UserProfileException("An unexpected error occurred.", String.valueOf(ex));
     }
   }
 

@@ -5,8 +5,7 @@ public class UserNotAuthenticatedException extends UserProfileException {
     super(message);
   }
 
-  // Constructor with message and cause
   public UserNotAuthenticatedException(String message, Throwable cause) {
-    super(message, cause);
+    super(message, String.valueOf(cause));
   }
 }
