@@ -7,7 +7,6 @@ import com.misfits.khoj.service.S3FileService;
 import com.misfits.khoj.service.UserService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -18,9 +17,14 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class FileController {
 
-  @Autowired private S3FileService s3FileService;
+  private final S3FileService s3FileService;
 
-  @Autowired UserService userService;
+  private final UserService userService;
+
+  public FileController(UserService userService, S3FileService s3FileService) {
+    this.userService = userService;
+    this.s3FileService = s3FileService;
+  }
 
   @PostMapping("/upload")
   public ResponseEntity<FileUploadResponse> uploadFile(

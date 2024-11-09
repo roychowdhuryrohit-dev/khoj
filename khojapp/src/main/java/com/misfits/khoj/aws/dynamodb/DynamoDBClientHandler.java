@@ -1,7 +1,6 @@
 package com.misfits.khoj.aws.dynamodb;
 
 import com.misfits.khoj.config.AwsConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -13,7 +12,11 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 @Configuration
 public class DynamoDBClientHandler {
 
-  @Autowired AwsConfig awsConfig;
+  final AwsConfig awsConfig;
+
+  public DynamoDBClientHandler(AwsConfig awsConfig) {
+    this.awsConfig = awsConfig;
+  }
 
   @Bean
   public DynamoDbClient dynamoDbClient() {

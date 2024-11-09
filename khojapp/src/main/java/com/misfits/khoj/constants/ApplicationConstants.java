@@ -12,4 +12,5 @@ public class ApplicationConstants {
   public static final String FILE_LISTING_ERROR = "FILE_LISTING_ERROR";
   public static final String FILE_STANDARDIZATION_ERROR = "FILE_STANDARDIZATION_ERROR";
   public static final String FILE_UPLOAD_ERROR = "FILE_UPLOAD_ERROR";
+  public static final String ID = "id";
 }

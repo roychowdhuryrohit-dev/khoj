@@ -2,6 +2,7 @@ package com.misfits.khoj.exceptions;
 
 import com.misfits.khoj.exceptions.fileexceptions.FileListingException;
 import com.misfits.khoj.exceptions.fileexceptions.FileUploadException;
+import com.misfits.khoj.exceptions.persitence.*;
 import com.misfits.khoj.exceptions.userexceptions.MissingUserAttributeException;
 import com.misfits.khoj.exceptions.userexceptions.UserNotAuthenticatedException;
 import com.misfits.khoj.exceptions.userexceptions.UserProfileException;
@@ -73,6 +74,54 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         HttpStatus.INTERNAL_SERVER_ERROR,
         "Internal Server Error",
         e.getMessage(),
+        request.getRequestURI());
+  }
+
+  // Custom DynamoDB exception handlers
+
+  @ExceptionHandler(UserPersistSaveException.class)
+  public ResponseEntity<ErrorResponse> handleUserPersistSaveException(
+      UserPersistSaveException ex, HttpServletRequest request) {
+    logger.error("UserPersistSaveException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Persistence Error",
+        ex.getMessage(),
+        request.getRequestURI());
+  }
+
+  @ExceptionHandler(UserDataSerializationException.class)
+  public ResponseEntity<ErrorResponse> handleUserDataSerializationException(
+      UserDataSerializationException ex, HttpServletRequest request) {
+    logger.error("UserDataSerializationException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.BAD_REQUEST, "Serialization Error", ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(UserExistsCheckException.class)
+  public ResponseEntity<ErrorResponse> handleUserDataSerializationException(
+      UserExistsCheckException ex, HttpServletRequest request) {
+    logger.error("UserExistsCheckException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.NOT_FOUND, "Existence Check Error", ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(UserDataValidationException.class)
+  public ResponseEntity<ErrorResponse> handleUserDataValidationException(
+      UserDataValidationException ex, HttpServletRequest request) {
+    logger.error("UserDataValidationException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.BAD_REQUEST, "Validation Error", ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(DynamoDbBaseException.class)
+  public ResponseEntity<ErrorResponse> handleDynamoDbBaseException(
+      DynamoDbBaseException ex, HttpServletRequest request) {
+    logger.error("DynamoDbBaseException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "DynamoDB Error",
+        ex.getMessage(),
         request.getRequestURI());
   }
 
