@@ -9,4 +9,7 @@ public class ApplicationConstants {
   public static final String S3_BASE_URL = "https://%s.s3.amazonaws.com/%s";
   public static final String SPACE_REGEX = "\\s+";
   public static final String UNDERSCORE = "_";
+  public static final String FILE_LISTING_ERROR = "FILE_LISTING_ERROR";
+  public static final String FILE_STANDARDIZATION_ERROR = "FILE_STANDARDIZATION_ERROR";
+  public static final String FILE_UPLOAD_ERROR = "FILE_UPLOAD_ERROR";
 }

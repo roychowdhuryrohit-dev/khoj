@@ -17,8 +17,6 @@ public class UserController {
 
   @GetMapping("/user")
   public UserProfile getUserProfileFromAuth(@AuthenticationPrincipal OAuth2User principal) {
-    // CHeck if exisits in dynamo db else put in dyanamodb
-    // userid is availabe in JWT
     return userService.getUserProfile(principal);
   }
 }
