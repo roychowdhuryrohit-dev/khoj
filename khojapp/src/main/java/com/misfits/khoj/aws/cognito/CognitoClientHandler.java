@@ -1,4 +1,4 @@
-package com.misfits.khoj.aws.s3;
+package com.misfits.khoj.aws.cognito;
 
 import com.misfits.khoj.config.AwsConfig;
 import org.springframework.context.annotation.Bean;
@@ -7,24 +7,24 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 
 @Configuration
-public class S3ClientHandler {
+public class CognitoClientHandler {
 
   final AwsConfig awsConfig;
 
-  public S3ClientHandler(AwsConfig awsConfig) {
+  public CognitoClientHandler(AwsConfig awsConfig) {
     this.awsConfig = awsConfig;
   }
 
   @Bean
-  public S3Client s3Client() {
+  public CognitoIdentityProviderClient cognitoIdentityProviderClient() {
     AwsCredentials awsCredentials =
         AwsBasicCredentials.create(awsConfig.getAccessKey(), awsConfig.getSecretAccessKey());
 
-    return S3Client.builder()
-        .region(Region.of(awsConfig.getS3Region()))
+    return CognitoIdentityProviderClient.builder()
+        .region(Region.of(awsConfig.getAwsRegion()))
         .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
         .build();
   }

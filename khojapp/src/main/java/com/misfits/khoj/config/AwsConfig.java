@@ -30,6 +30,9 @@ public class AwsConfig {
   @Value("${aws.service.cognito.user-pool-id}")
   String cognitoUserPoolId;
 
+  @Value("${aws.service.dynamodb.table-name}")
+  String dynamoDbTableName;
+
   public String getAccessKey() {
     return accessKey;
   }
@@ -60,5 +63,13 @@ public class AwsConfig {
 
   public String getCognitoUserPoolId() {
     return cognitoUserPoolId;
+  }
+
+  public String getDynamoDbTableName() {
+    return dynamoDbTableName;
+  }
+
+  public void setDynamoDbTableName(String dynamoDbTableName) {
+    this.dynamoDbTableName = dynamoDbTableName;
   }
 }

@@ -41,6 +41,7 @@ aws:
         base-directory: ${spring.application.name}/files
     dynamodb:
       region: us-east-1
+      table-name: user
 
 
 
