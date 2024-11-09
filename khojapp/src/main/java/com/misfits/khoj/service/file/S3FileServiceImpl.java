@@ -12,12 +12,12 @@ import com.misfits.khoj.model.file.ListUserFilesResponse;
 import com.misfits.khoj.model.file.MultipleFileUploadResponse;
 import com.misfits.khoj.persistence.DynamoDbPersistenceService;
 import com.misfits.khoj.service.S3FileService;
+import com.misfits.khoj.service.UserService;
 import com.misfits.khoj.utils.KhojUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -29,11 +29,24 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 @Slf4j
 public class S3FileServiceImpl implements S3FileService {
 
-  @Autowired AwsConfig awsConfig;
+  final AwsConfig awsConfig;
 
-  @Autowired S3Client s3Client;
+  final S3Client s3Client;
 
-  @Autowired DynamoDbPersistenceService dynamoDbPersistenceService;
+  final DynamoDbPersistenceService dynamoDbPersistenceService;
+
+  final UserService userService;
+
+  public S3FileServiceImpl(
+      AwsConfig awsConfig,
+      S3Client s3Client,
+      DynamoDbPersistenceService dynamoDbPersistenceService,
+      UserService userService) {
+    this.awsConfig = awsConfig;
+    this.s3Client = s3Client;
+    this.dynamoDbPersistenceService = dynamoDbPersistenceService;
+    this.userService = userService;
+  }
 
   @Override
   public FileUploadResponse uploadFile(MultipartFile file, String userId) {
@@ -47,6 +60,12 @@ public class S3FileServiceImpl implements S3FileService {
       log.error("Failed to standardize file name for user {}: {}", userId, e.getMessage());
       throw e;
     }
+
+    log.info(
+        "Uploading file {} with Standardized Name {} into bucket {}",
+        file.getOriginalFilename(),
+        standardizedFileName,
+        awsConfig.getS3BucketName());
 
     String key =
         String.format("%s/%s/%s", awsConfig.getS3BaseDirectory(), userId, standardizedFileName);
@@ -66,7 +85,6 @@ public class S3FileServiceImpl implements S3FileService {
           userId);
 
     } catch (Exception e) {
-      // Handle both IOException and S3Exception with a single catch block
       String errorMessage =
           (e instanceof S3Exception s3Exception)
               ? s3Exception.awsErrorDetails().errorMessage()
@@ -79,7 +97,6 @@ public class S3FileServiceImpl implements S3FileService {
           errorMessage);
       throw new FileUploadException("File upload failed: " + errorMessage, e);
     }
-
     return fileUploadResponse;
   }
 
@@ -98,45 +115,65 @@ public class S3FileServiceImpl implements S3FileService {
                 })
             .toList();
 
-    // Create and populate MultipleFileUploadResponse
-    MultipleFileUploadResponse multipleFileUploadResponse = new MultipleFileUploadResponse();
-    multipleFileUploadResponse.setUserId(userId);
-    multipleFileUploadResponse.setTotalFiles(fileResponses.size());
-    multipleFileUploadResponse.setFiles(fileResponses);
-
-    return multipleFileUploadResponse;
+    return getMultipleFileUploadResponse(userId, fileResponses);
   }
 
   @Override
   public ListUserFilesResponse listUserFiles(String userId) {
     validateUserIdNotNull(userId);
-    String prefix = String.format("%s/%s/", awsConfig.getS3BaseDirectory(), userId);
+    if (!dynamoDbPersistenceService.checkIfUserExists(awsConfig.getDynamoDbTableName(), userId)) {
+      log.info(
+          "Saving User to Database {} for userId {}", awsConfig.getDynamoDbTableName(), userId);
+      dynamoDbPersistenceService.saveUserProfileDetails(
+          awsConfig.getDynamoDbTableName(),
+          userId,
+          userService.fetchUserDetails(awsConfig.getCognitoUserPoolId(), userId));
+    } else {
+      log.info("User already exists in Database for userId {}", userId);
+    }
+
+    String directoryPathPrefix = String.format("%s/%s/", awsConfig.getS3BaseDirectory(), userId);
     log.info(
-        "Retrieving all files for user {} from bucket {}", userId, awsConfig.getS3BucketName());
+        "Retrieving all files for UserId {} from storage {}", userId, awsConfig.getS3BucketName());
 
     ListObjectsV2Request request =
-        ListObjectsV2Request.builder().bucket(awsConfig.getS3BucketName()).prefix(prefix).build();
+        ListObjectsV2Request.builder()
+            .bucket(awsConfig.getS3BucketName())
+            .prefix(directoryPathPrefix)
+            .build();
     ListUserFilesResponse listUserFilesResponse = new ListUserFilesResponse();
     listUserFilesResponse.setUserId(userId);
     try {
-      // Attempt to list objects from S3
       Map<String, String> files =
           s3Client.listObjectsV2(request).contents().stream()
               .collect(
                   Collectors.toMap(
                       s3Object ->
-                          s3Object.key().substring(prefix.length()), // Extract only the file name
+                          s3Object
+                              .key()
+                              .substring(
+                                  directoryPathPrefix.length()), // Extract only the file name
                       s3Object ->
                           String.format(S3_BASE_URL, awsConfig.getS3BucketName(), s3Object.key())));
 
       listUserFilesResponse.setFiles(files);
 
     } catch (S3Exception e) {
-      // Log and throw a FileListingException for S3-specific issues
-      log.error("Failed to list files for user {}: {}", userId, e.awsErrorDetails().errorMessage());
-      throw new FileListingException("Failed to list files from S3 for user " + userId, e);
+      log.error(
+          "Failed to retrieve files for userId {}: {}", userId, e.awsErrorDetails().errorMessage());
+      throw new FileListingException("Failed to list files from S3 for userId:  " + userId, e);
     }
-    log.info("Successfully retrieved file list for user {}", userId);
+    log.info("Successfully retrieved all available files for userId {}", userId);
     return listUserFilesResponse;
+  }
+
+  private static MultipleFileUploadResponse getMultipleFileUploadResponse(
+      String userId, List<FileUploadResponse> fileResponses) {
+    // Create and populate MultipleFileUploadResponse
+    MultipleFileUploadResponse multipleFileUploadResponse = new MultipleFileUploadResponse();
+    multipleFileUploadResponse.setUserId(userId);
+    multipleFileUploadResponse.setTotalFiles(fileResponses.size());
+    multipleFileUploadResponse.setFiles(fileResponses);
+    return multipleFileUploadResponse;
   }
 }
