@@ -28,8 +28,8 @@ spring:
       max-request-size: 100MB
 
 aws:
-  accessKey: AKIAZI2LDEGGM2252YOC
-  secretAccessKey: 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
+  accessKey: ${AWS_ACCESS_KEY_ID}
+  secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
   region: us-east-1
   service:
     cognito:
@@ -40,7 +40,7 @@ aws:
       file:
         base-directory: ${spring.application.name}/files
     dynamodb:
-      region: us-east-1
+      region: ${aws.region}
       table-name: user
 
 

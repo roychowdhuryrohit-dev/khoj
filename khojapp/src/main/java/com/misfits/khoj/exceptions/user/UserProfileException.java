@@ -1,4 +1,4 @@
-package com.misfits.khoj.exceptions.userexceptions;
+package com.misfits.khoj.exceptions.user;
 
 public class UserProfileException extends RuntimeException {
   private final String errorCode;
