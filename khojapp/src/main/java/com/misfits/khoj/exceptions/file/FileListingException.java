@@ -1,4 +1,4 @@
-package com.misfits.khoj.exceptions.fileexceptions;
+package com.misfits.khoj.exceptions.file;
 
 import static com.misfits.khoj.constants.ApplicationConstants.FILE_LISTING_ERROR;
 

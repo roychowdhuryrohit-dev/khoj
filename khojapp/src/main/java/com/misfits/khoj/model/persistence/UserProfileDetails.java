@@ -1,8 +1,11 @@
 package com.misfits.khoj.model.persistence;
 
+import com.misfits.khoj.constants.ApplicationConstants;
 import com.misfits.khoj.model.user.BaseUserProfile;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.misfits.khoj.constants.ApplicationConstants.*;
 
 public class UserProfileDetails extends BaseUserProfile {
   String email;
@@ -11,10 +14,10 @@ public class UserProfileDetails extends BaseUserProfile {
   private Map<String, String> files = new HashMap<>();
 
   public UserProfileDetails(Map<String, Object> attributes) {
-    super.setUserId((String) attributes.get("sub"));
-    this.email = (String) attributes.get("email");
-    this.emailVerified = (Boolean) attributes.get("email_verified");
-    this.name = (String) attributes.get("name");
+    super.setUserId((String) attributes.get(SUB));
+    this.email = (String) attributes.get(EMAIL);
+    this.emailVerified = (Boolean) attributes.get(EMAIL_VERIFIED);
+    this.name = (String) attributes.get(NAME);
   }
 
   public UserProfileDetails() {}

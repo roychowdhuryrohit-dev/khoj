@@ -2,9 +2,9 @@ package com.misfits.khoj.service.user;
 
 import static com.misfits.khoj.constants.ApplicationConstants.*;
 
-import com.misfits.khoj.exceptions.userexceptions.MissingUserAttributeException;
-import com.misfits.khoj.exceptions.userexceptions.UserNotAuthenticatedException;
-import com.misfits.khoj.exceptions.userexceptions.UserProfileException;
+import com.misfits.khoj.exceptions.user.MissingUserAttributeException;
+import com.misfits.khoj.exceptions.user.UserNotAuthenticatedException;
+import com.misfits.khoj.exceptions.user.UserProfileException;
 import com.misfits.khoj.model.persistence.UserProfileDetails;
 import com.misfits.khoj.model.user.UserProfile;
 import com.misfits.khoj.service.UserService;
@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
   private void validateAttribute(
       Map<String, Object> attributes, String attributeName, String errorMessage) {
     Object attributeValue = attributes.get(attributeName);
-    if (!(attributeValue instanceof String) || ((String) attributeValue).isBlank()) {
+    if (!(attributeValue instanceof String s) || (s).isBlank()) {
       log.error(errorMessage);
       throw new MissingUserAttributeException(errorMessage);
     }
