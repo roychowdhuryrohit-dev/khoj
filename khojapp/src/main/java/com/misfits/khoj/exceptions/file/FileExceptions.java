@@ -1,4 +1,4 @@
-package com.misfits.khoj.exceptions.fileexceptions;
+package com.misfits.khoj.exceptions.file;
 
 public class FileExceptions extends RuntimeException {
 

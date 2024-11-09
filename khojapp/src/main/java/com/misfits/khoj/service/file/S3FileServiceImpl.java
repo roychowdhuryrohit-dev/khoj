@@ -4,9 +4,9 @@ import static com.misfits.khoj.constants.ApplicationConstants.S3_BASE_URL;
 import static com.misfits.khoj.utils.KhojUtils.validateUserIdNotNull;
 
 import com.misfits.khoj.config.AwsConfig;
-import com.misfits.khoj.exceptions.fileexceptions.FileListingException;
-import com.misfits.khoj.exceptions.fileexceptions.FileStandardizationException;
-import com.misfits.khoj.exceptions.fileexceptions.FileUploadException;
+import com.misfits.khoj.exceptions.file.FileListingException;
+import com.misfits.khoj.exceptions.file.FileStandardizationException;
+import com.misfits.khoj.exceptions.file.FileUploadException;
 import com.misfits.khoj.model.file.FileUploadResponse;
 import com.misfits.khoj.model.file.ListUserFilesResponse;
 import com.misfits.khoj.model.file.MultipleFileUploadResponse;

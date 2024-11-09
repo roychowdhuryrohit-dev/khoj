@@ -1,11 +1,11 @@
 package com.misfits.khoj.exceptions;
 
-import com.misfits.khoj.exceptions.fileexceptions.FileListingException;
-import com.misfits.khoj.exceptions.fileexceptions.FileUploadException;
+import com.misfits.khoj.exceptions.file.FileListingException;
+import com.misfits.khoj.exceptions.file.FileUploadException;
 import com.misfits.khoj.exceptions.persitence.*;
-import com.misfits.khoj.exceptions.userexceptions.MissingUserAttributeException;
-import com.misfits.khoj.exceptions.userexceptions.UserNotAuthenticatedException;
-import com.misfits.khoj.exceptions.userexceptions.UserProfileException;
+import com.misfits.khoj.exceptions.user.MissingUserAttributeException;
+import com.misfits.khoj.exceptions.user.UserNotAuthenticatedException;
+import com.misfits.khoj.exceptions.user.UserProfileException;
 import com.misfits.khoj.model.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
