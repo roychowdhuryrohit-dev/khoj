@@ -1,11 +1,10 @@
 package com.misfits.khoj.model.persistence;
 
-import com.misfits.khoj.constants.ApplicationConstants;
+import static com.misfits.khoj.constants.ApplicationConstants.*;
+
 import com.misfits.khoj.model.user.BaseUserProfile;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.misfits.khoj.constants.ApplicationConstants.*;
 
 public class UserProfileDetails extends BaseUserProfile {
   String email;

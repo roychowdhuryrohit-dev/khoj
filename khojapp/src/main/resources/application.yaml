@@ -14,9 +14,9 @@ spring:
       client:
         registration:
           cognito:
-            client-id: 77rk9usn4he5h8v7oec6oapa64
-            client-secret: vs1tkap0ocd4se0sc5b445cu3gj7fogj1g3no4c2ve4t8tmb0uo
-            redirect-uri: http://localhost:8080/login/oauth2/code/cognito
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            redirect-uri: ${REDIRECT_URI}
         provider:
           cognito:
             issuer-uri: https://cognito-idp.${aws.region}.amazonaws.com/${aws.service.cognito.user-pool-id}
@@ -33,7 +33,7 @@ aws:
   region: us-east-1
   service:
     cognito:
-      user-pool-id: ${aws.region}_E4Msk8R6D
+      user-pool-id: ${aws.region}_${USER_POOL_ID}
     s3:
       region: us-east-2
       bucketName: ${spring.application.name}bucket
@@ -41,7 +41,7 @@ aws:
         base-directory: ${spring.application.name}/files
     dynamodb:
       region: ${aws.region}
-      table-name: user
+      table-name: ${DYNAMODB_TABLE_NAME}
 
 
 
