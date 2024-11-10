@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: khoj
+  tomcat:
+    max-http-form-post-size: 104857600
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://cognito-idp.${aws.region}.amazonaws.com/${aws.service.cognito.user-pool-id}
+      client:
+        registration:
+          cognito:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            redirect-uri: ${REDIRECT_URI}
+        provider:
+          cognito:
+            issuer-uri: https://cognito-idp.${aws.region}.amazonaws.com/${aws.service.cognito.user-pool-id}
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+aws:
+  accessKey: ${AWS_ACCESS_KEY_ID}
+  secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+  region: us-east-1
+  service:
+    cognito:
+      user-pool-id: ${aws.region}_${USER_POOL_ID}
+    s3:
+      region: us-east-2
+      bucketName: ${spring.application.name}bucket
+      file:
+        base-directory: ${spring.application.name}/files
+    dynamodb:
+      region: ${aws.region}
+      table-name: ${DYNAMODB_TABLE_NAME}
+
+
