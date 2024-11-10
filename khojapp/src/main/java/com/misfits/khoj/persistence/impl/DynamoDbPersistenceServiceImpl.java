@@ -2,10 +2,8 @@ package com.misfits.khoj.persistence.impl;
 
 import static com.misfits.khoj.constants.ApplicationConstants.*;
 
-import com.misfits.khoj.exceptions.persitence.UserDataSerializationException;
-import com.misfits.khoj.exceptions.persitence.UserDataValidationException;
-import com.misfits.khoj.exceptions.persitence.UserExistsCheckException;
-import com.misfits.khoj.exceptions.persitence.UserPersistSaveException;
+import com.misfits.khoj.exceptions.persitence.*;
+import com.misfits.khoj.model.persistence.PersistenceKeys;
 import com.misfits.khoj.model.persistence.UserProfileDetails;
 import com.misfits.khoj.persistence.DynamoDbPersistenceService;
 import com.misfits.khoj.utils.KhojUtils;
@@ -14,10 +12,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
-import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
-import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.*;
 
 @Service
 @Slf4j
@@ -67,7 +62,7 @@ public class DynamoDbPersistenceServiceImpl implements DynamoDbPersistenceServic
   @Override
   public boolean checkIfUserExists(String tableName, String userId) {
     Map<String, AttributeValue> keyToGet = new HashMap<>();
-    keyToGet.put("id", AttributeValue.builder().s(userId).build());
+    keyToGet.put(ID, AttributeValue.builder().s(userId).build());
 
     GetItemRequest request = GetItemRequest.builder().tableName(tableName).key(keyToGet).build();
 
@@ -89,5 +84,125 @@ public class DynamoDbPersistenceServiceImpl implements DynamoDbPersistenceServic
           e.getMessage());
       throw new UserExistsCheckException("Unexpected error while checking if user exists", e);
     }
+  }
+
+  @Override
+  public void updateMapKey(
+      String tableName,
+      String primaryKey,
+      String primaryKeyValue,
+      String attributeName,
+      String newValue) {
+
+    Map<String, AttributeValue> key = new HashMap<>();
+    key.put(primaryKey, AttributeValue.builder().s(primaryKeyValue).build());
+
+    try {
+      if (checkAttributeBeingUpdated(attributeName)) return;
+
+      String updateExpression = "SET " + attributeName + " = :newValue";
+      Map<String, AttributeValue> expressionValues = new HashMap<>();
+      expressionValues.put(":newValue", AttributeValue.builder().s(newValue).build());
+
+      UpdateItemRequest request =
+          getUpdateItemRequest(tableName, key, updateExpression, expressionValues);
+      dynamoDbClient.updateItem(request);
+
+      log.info("Updated top-level attribute '{}' in table '{}'", attributeName, tableName);
+
+    } catch (DynamoDbException e) {
+      log.error(
+          "Failed to update top-level attribute {}  for userId {} in table {} ",
+          attributeName,
+          primaryKeyValue,
+          tableName,
+          e);
+      throw new DynamoDBUpdateException(
+          "Exception Occurred while updating top-level attribute in DynamoDB table ", e);
+    }
+  }
+
+  @Override
+  public void updateMapKey(
+      String tableName,
+      String primaryKey,
+      String primaryKeyValue,
+      String mapAttributeName,
+      String mapKey,
+      String mapValue) {
+
+    Map<String, AttributeValue> key = new HashMap<>();
+    key.put(primaryKey, AttributeValue.builder().s(primaryKeyValue).build());
+    try {
+      if (checkAttributeBeingUpdated(mapAttributeName)) return;
+      String initExpression =
+          String.format(
+              "SET %s = if_not_exists(%s, :emptyMap)", mapAttributeName, mapAttributeName);
+      Map<String, AttributeValue> initValues = new HashMap<>();
+      initValues.put(":emptyMap", AttributeValue.builder().m(new HashMap<>()).build());
+
+      UpdateItemRequest initRequest =
+          getUpdateItemRequest(tableName, key, initExpression, initValues);
+      dynamoDbClient.updateItem(initRequest);
+
+      String updateExpression = String.format("SET %s.#mapKey = :mapValue", mapAttributeName);
+      Map<String, AttributeValue> expressionValues = new HashMap<>();
+      expressionValues.put(":mapValue", AttributeValue.builder().s(mapValue).build());
+
+      Map<String, String> expressionNames = new HashMap<>();
+      expressionNames.put("#mapKey", mapKey);
+
+      UpdateItemRequest updateRequest =
+          getUpdateItemRequest(tableName, key, updateExpression, expressionValues, expressionNames);
+      dynamoDbClient.updateItem(updateRequest);
+
+      log.info("Updated nested attribute in table: {}", tableName);
+
+    } catch (DynamoDbException e) {
+      log.error(
+          "Failed to update nested attribute {}  for userId {} in table {} ",
+          mapKey,
+          primaryKeyValue,
+          tableName,
+          e);
+      throw new DynamoDBUpdateException(
+          "Exception Occurred while updating nested attribute in DynamoDB table ", e);
+    }
+  }
+
+  private static UpdateItemRequest getUpdateItemRequest(
+      String tableName,
+      Map<String, AttributeValue> key,
+      String updateExpression,
+      Map<String, AttributeValue> expressionValues,
+      Map<String, String> expressionNames) {
+    return UpdateItemRequest.builder()
+        .tableName(tableName)
+        .key(key)
+        .updateExpression(updateExpression)
+        .expressionAttributeValues(expressionValues)
+        .expressionAttributeNames(expressionNames)
+        .build();
+  }
+
+  private static UpdateItemRequest getUpdateItemRequest(
+      String tableName,
+      Map<String, AttributeValue> key,
+      String initExpression,
+      Map<String, AttributeValue> initValues) {
+    return UpdateItemRequest.builder()
+        .tableName(tableName)
+        .key(key)
+        .updateExpression(initExpression)
+        .expressionAttributeValues(initValues)
+        .build();
+  }
+
+  private static boolean checkAttributeBeingUpdated(String attributeName) {
+    if (PersistenceKeys.USER_FILES.equals(attributeName)) {
+      log.warn("Update aborted: Only the 'files' attribute is allowed to be updated. Provided attribute: {}", attributeName);
+      return true;
+    }
+    return false;
   }
 }

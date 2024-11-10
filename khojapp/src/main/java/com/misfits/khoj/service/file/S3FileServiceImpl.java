@@ -1,5 +1,6 @@
 package com.misfits.khoj.service.file;
 
+import static com.misfits.khoj.constants.ApplicationConstants.ID;
 import static com.misfits.khoj.constants.ApplicationConstants.S3_BASE_URL;
 import static com.misfits.khoj.utils.KhojUtils.validateUserIdNotNull;
 
@@ -10,6 +11,7 @@ import com.misfits.khoj.exceptions.file.FileUploadException;
 import com.misfits.khoj.model.file.FileUploadResponse;
 import com.misfits.khoj.model.file.ListUserFilesResponse;
 import com.misfits.khoj.model.file.MultipleFileUploadResponse;
+import com.misfits.khoj.model.persistence.PersistenceKeys;
 import com.misfits.khoj.persistence.DynamoDbPersistenceService;
 import com.misfits.khoj.service.S3FileService;
 import com.misfits.khoj.service.UserService;
@@ -83,6 +85,21 @@ public class S3FileServiceImpl implements S3FileService {
           standardizedFileName,
           awsConfig.getS3BucketName(),
           userId);
+
+      dynamoDbPersistenceService.updateMapKey(
+          awsConfig.getDynamoDbTableName(),
+          ID,
+          userId,
+          PersistenceKeys.USER_FILES.getKey(), //  top-level attribute key
+          standardizedFileName, // Key within the map : fileName
+          fileUploadResponse.getFileUrl() // Value for the fileName ket
+          );
+
+      log.info(
+          "Updated DynamoDB record for userId {} with fileName {} in the key {}",
+          userId,
+          standardizedFileName,
+          PersistenceKeys.USER_FILES.getKey());
 
     } catch (Exception e) {
       String errorMessage =
