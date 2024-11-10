@@ -200,7 +200,9 @@ public class DynamoDbPersistenceServiceImpl implements DynamoDbPersistenceServic
 
   private static boolean checkAttributeBeingUpdated(String attributeName) {
     if (PersistenceKeys.USER_FILES.equals(attributeName)) {
-      log.warn("Update aborted: Only the 'files' attribute is allowed to be updated. Provided attribute: {}", attributeName);
+      log.warn(
+          "Update aborted: Only the 'files' attribute is allowed to be updated. Provided attribute: {}",
+          attributeName);
       return true;
     }
     return false;
