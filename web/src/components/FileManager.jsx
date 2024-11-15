@@ -26,8 +26,7 @@ export default function FileManager() {
       const response = await fetch('/listUserFiles')
       if (response.ok) {
         const data = await response.json()
-        setFiles(data.files)
-        console.log(data)
+        setFiles(Object.entries(data.files))
       } else {
         console.error('Failed to fetch files')
       }

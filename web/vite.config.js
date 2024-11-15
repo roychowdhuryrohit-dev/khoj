@@ -14,4 +14,5 @@ export default defineConfig({
     outDir: '../khojapp/src/main/resources/static',
     emptyOutDir: true, // also necessary
   }
+  
 })
