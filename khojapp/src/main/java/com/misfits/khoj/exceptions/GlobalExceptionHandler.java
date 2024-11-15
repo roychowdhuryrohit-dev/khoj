@@ -2,6 +2,9 @@ package com.misfits.khoj.exceptions;
 
 import com.misfits.khoj.exceptions.file.FileListingException;
 import com.misfits.khoj.exceptions.file.FileUploadException;
+import com.misfits.khoj.exceptions.file.s3.InvalidPresignedUrlRequestException;
+import com.misfits.khoj.exceptions.file.s3.PresignedUrlGenerationException;
+import com.misfits.khoj.exceptions.file.s3.S3PresignedUrlException;
 import com.misfits.khoj.exceptions.persitence.*;
 import com.misfits.khoj.exceptions.user.MissingUserAttributeException;
 import com.misfits.khoj.exceptions.user.UserNotAuthenticatedException;
@@ -112,6 +115,36 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     logger.error("UserDataValidationException occurred:", ex);
     return buildErrorResponse(
         HttpStatus.BAD_REQUEST, "Validation Error", ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(InvalidPresignedUrlRequestException.class)
+  public ResponseEntity<ErrorResponse> handleInvalidPresignedUrlRequestException(
+      InvalidPresignedUrlRequestException ex, HttpServletRequest request) {
+    logger.error("InvalidPresignedUrlRequestException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.BAD_REQUEST,
+        "Invalid Presigned Url Request Error",
+        ex.getMessage(),
+        request.getRequestURI());
+  }
+
+  @ExceptionHandler(PresignedUrlGenerationException.class)
+  public ResponseEntity<ErrorResponse> handlePresignedUrlGenerationException(
+      PresignedUrlGenerationException ex, HttpServletRequest request) {
+    logger.error("PresignedUrlGenerationException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.BAD_REQUEST,
+        "Presigned Url Generation Error",
+        ex.getMessage(),
+        request.getRequestURI());
+  }
+
+  @ExceptionHandler(S3PresignedUrlException.class)
+  public ResponseEntity<ErrorResponse> handleS3PresignedUrlException(
+      S3PresignedUrlException ex, HttpServletRequest request) {
+    logger.error("S3PresignedUrlException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.BAD_REQUEST, "S3 PresignedUrl Error", ex.getMessage(), request.getRequestURI());
   }
 
   @ExceptionHandler(DynamoDbBaseException.class)

@@ -30,7 +30,7 @@ public class KhojUtils {
       }
       return fileName.replaceAll(SPACE_REGEX, UNDERSCORE); // Replace spaces with underscores
     } catch (FileStandardizationException e) {
-      throw new FileStandardizationException("File name cannot be null", e);
+      throw new FileStandardizationException("Exception occurred while standardizing filename", e);
     }
   }
 

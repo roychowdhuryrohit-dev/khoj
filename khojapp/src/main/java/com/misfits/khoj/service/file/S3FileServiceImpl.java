@@ -1,21 +1,25 @@
 package com.misfits.khoj.service.file;
 
-import static com.misfits.khoj.constants.ApplicationConstants.ID;
-import static com.misfits.khoj.constants.ApplicationConstants.S3_BASE_URL;
+import static com.misfits.khoj.constants.ApplicationConstants.*;
 import static com.misfits.khoj.utils.KhojUtils.validateUserIdNotNull;
 
 import com.misfits.khoj.config.AwsConfig;
 import com.misfits.khoj.exceptions.file.FileListingException;
 import com.misfits.khoj.exceptions.file.FileStandardizationException;
 import com.misfits.khoj.exceptions.file.FileUploadException;
+import com.misfits.khoj.exceptions.file.s3.InvalidPresignedUrlRequestException;
+import com.misfits.khoj.exceptions.file.s3.PresignedUrlGenerationException;
+import com.misfits.khoj.exceptions.file.s3.S3PresignedUrlException;
 import com.misfits.khoj.model.file.FileUploadResponse;
 import com.misfits.khoj.model.file.ListUserFilesResponse;
 import com.misfits.khoj.model.file.MultipleFileUploadResponse;
+import com.misfits.khoj.model.file.PreSignedUrlResponse;
 import com.misfits.khoj.model.persistence.PersistenceKeys;
 import com.misfits.khoj.persistence.DynamoDbPersistenceService;
 import com.misfits.khoj.service.S3FileService;
 import com.misfits.khoj.service.UserService;
 import com.misfits.khoj.utils.KhojUtils;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +30,8 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 @Service
 @Slf4j
@@ -39,15 +45,19 @@ public class S3FileServiceImpl implements S3FileService {
 
   final UserService userService;
 
+  final S3Presigner s3Presigner;
+
   public S3FileServiceImpl(
       AwsConfig awsConfig,
       S3Client s3Client,
       DynamoDbPersistenceService dynamoDbPersistenceService,
-      UserService userService) {
+      UserService userService,
+      S3Presigner s3Presigner) {
     this.awsConfig = awsConfig;
     this.s3Client = s3Client;
     this.dynamoDbPersistenceService = dynamoDbPersistenceService;
     this.userService = userService;
+    this.s3Presigner = s3Presigner;
   }
 
   @Override
@@ -69,8 +79,7 @@ public class S3FileServiceImpl implements S3FileService {
         standardizedFileName,
         awsConfig.getS3BucketName());
 
-    String key =
-        String.format("%s/%s/%s", awsConfig.getS3BaseDirectory(), userId, standardizedFileName);
+    String key = getFileKey(standardizedFileName, userId);
     try {
       s3Client.putObject(
           PutObjectRequest.builder().bucket(awsConfig.getS3BucketName()).key(key).build(),
@@ -182,6 +191,71 @@ public class S3FileServiceImpl implements S3FileService {
     }
     log.info("Successfully retrieved all available files for userId {}", userId);
     return listUserFilesResponse;
+  }
+
+  @Override
+  public PreSignedUrlResponse getPresignedUrlForFile(String fileName, String userId) {
+
+    validateUserIdNotNull(userId);
+
+    log.info(
+        "Received Request to generate Presigned URL for file {} for userId {}", fileName, userId);
+
+    String fileKey = getFileKey(fileName, userId);
+
+    try {
+      GetObjectRequest getObjectRequest =
+          GetObjectRequest.builder().bucket(awsConfig.getS3BucketName()).key(fileKey).build();
+
+      GetObjectPresignRequest getObjectPresignRequest =
+          GetObjectPresignRequest.builder()
+              .signatureDuration(Duration.ofMinutes(PRESIGN_DURATION_MINUTES))
+              .getObjectRequest(getObjectRequest)
+              .build();
+
+      PreSignedUrlResponse preSignedUrlResponse =
+          getPreSignedUrlResponseObject(userId, getObjectPresignRequest);
+
+      log.info(preSignedUrlResponse.toString());
+
+      log.info("Generated Presigned URL for file {} for userId {}", fileName, userId);
+
+      return preSignedUrlResponse;
+
+    } catch (IllegalArgumentException ex) {
+      log.error("Invalid arguments provided: fileName={}, userId={}", fileName, userId, ex);
+      throw new InvalidPresignedUrlRequestException(
+          "Invalid input parameters for generating presigned URL", ex);
+    } catch (S3Exception ex) {
+      log.error(
+          "S3 exception while generating presigned URL for file: {} and userId: {}",
+          fileName,
+          userId,
+          ex);
+      throw new S3PresignedUrlException(
+          "Error occurred while interacting with S3 to generate presigned URL", ex);
+    } catch (Exception ex) {
+      log.error(
+          "Unexpected error while generating presigned URL for file: {} and userId: {}",
+          fileName,
+          userId,
+          ex);
+      throw new PresignedUrlGenerationException(
+          "Unexpected error occurred while generating presigned URL", ex);
+    }
+  }
+
+  private String getFileKey(String fileName, String userId) {
+    return String.format("%s/%s/%s", awsConfig.getS3BaseDirectory(), userId, fileName);
+  }
+
+  private PreSignedUrlResponse getPreSignedUrlResponseObject(
+      String userId, GetObjectPresignRequest getObjectPresignRequest) {
+    PreSignedUrlResponse preSignedUrlResponse = new PreSignedUrlResponse();
+    preSignedUrlResponse.setPreSignedUrl(
+        s3Presigner.presignGetObject(getObjectPresignRequest).url().toString());
+    preSignedUrlResponse.setUserId(userId);
+    return preSignedUrlResponse;
   }
 
   private static MultipleFileUploadResponse getMultipleFileUploadResponse(
