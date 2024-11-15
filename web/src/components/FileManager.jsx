@@ -65,7 +65,7 @@ export default function FileManager() {
   const handleFileDownload = async (filename) => {
     setDownloadingFile(filename)
     try {
-      const response = await fetch(`/getPreSignedFileUrl?filename=${encodeURIComponent(filename)}`)
+      const response = await fetch(`/getPreSignedUrl?fileName=${encodeURIComponent(filename)}`)
       if (response.ok) {
         const { preSignedUrl } = await response.json()
         const fileResponse = await fetch(preSignedUrl)
