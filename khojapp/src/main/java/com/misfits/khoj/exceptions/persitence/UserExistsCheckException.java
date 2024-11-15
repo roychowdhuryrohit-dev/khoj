@@ -1,6 +1,6 @@
 package com.misfits.khoj.exceptions.persitence;
 
-public class UserExistsCheckException extends RuntimeException {
+public class UserExistsCheckException extends DynamoDbBaseException {
 
   public UserExistsCheckException() {
     super();

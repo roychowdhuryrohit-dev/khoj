@@ -3,6 +3,7 @@ package com.misfits.khoj.controller;
 import com.misfits.khoj.model.file.FileUploadResponse;
 import com.misfits.khoj.model.file.ListUserFilesResponse;
 import com.misfits.khoj.model.file.MultipleFileUploadResponse;
+import com.misfits.khoj.model.file.PreSignedUrlResponse;
 import com.misfits.khoj.service.S3FileService;
 import com.misfits.khoj.service.UserService;
 import java.util.List;
@@ -48,5 +49,13 @@ public class FileController {
       @AuthenticationPrincipal OAuth2User principal) {
     ListUserFilesResponse response = s3FileService.listUserFiles(userService.getUserId(principal));
     return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/getPreSignedUrl")
+  public ResponseEntity<PreSignedUrlResponse> getPresignedUrlForFile(
+      @RequestParam("fileName") String fileName, @AuthenticationPrincipal OAuth2User principal) {
+    PreSignedUrlResponse preSignedUrlResponse =
+        s3FileService.getPresignedUrlForFile(fileName, userService.getUserId(principal));
+    return ResponseEntity.ok(preSignedUrlResponse);
   }
 }

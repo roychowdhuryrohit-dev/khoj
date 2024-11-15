@@ -13,4 +13,8 @@ public class ApplicationConstants {
   public static final String FILE_STANDARDIZATION_ERROR = "FILE_STANDARDIZATION_ERROR";
   public static final String FILE_UPLOAD_ERROR = "FILE_UPLOAD_ERROR";
   public static final String ID = "id";
+  public static final int PRESIGN_DURATION_MINUTES = 10;
+  public static final String INVALID_PRESIGNED_URL_REQUEST = "INVALID_PRESIGNED_URL_REQUEST";
+  public static final String PRESIGNED_URL_GEN_ERROR = "PRESIGNED_URL_GEN_ERROR";
+  public static final String S3_PRESIGNED_URL_ERROR = "S3_PRESIGNED_URL_ERROR";
 }
