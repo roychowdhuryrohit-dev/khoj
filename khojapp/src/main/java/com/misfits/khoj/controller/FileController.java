@@ -51,9 +51,9 @@ public class FileController {
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("/getPreSignedUrl")
+  @GetMapping("/userFile/{fileName}")
   public ResponseEntity<PreSignedUrlResponse> getPresignedUrlForFile(
-      @RequestParam("fileName") String fileName, @AuthenticationPrincipal OAuth2User principal) {
+      @PathVariable("fileName") String fileName, @AuthenticationPrincipal OAuth2User principal) {
     PreSignedUrlResponse preSignedUrlResponse =
         s3FileService.getPresignedUrlForFile(fileName, userService.getUserId(principal));
     return ResponseEntity.ok(preSignedUrlResponse);
