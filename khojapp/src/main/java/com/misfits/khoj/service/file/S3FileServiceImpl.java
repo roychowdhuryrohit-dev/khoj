@@ -216,8 +216,6 @@ public class S3FileServiceImpl implements S3FileService {
       PreSignedUrlResponse preSignedUrlResponse =
           getPreSignedUrlResponseObject(userId, getObjectPresignRequest);
 
-      log.info(preSignedUrlResponse.toString());
-
       log.info("Generated Presigned URL for file {} for userId {}", fileName, userId);
 
       return preSignedUrlResponse;
