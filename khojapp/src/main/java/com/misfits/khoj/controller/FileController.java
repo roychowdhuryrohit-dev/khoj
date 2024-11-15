@@ -51,7 +51,7 @@ public class FileController {
     return ResponseEntity.ok(response);
   }
 
-  @PostMapping("/getPreSignedUrl")
+  @GetMapping("/getPreSignedUrl")
   public ResponseEntity<PreSignedUrlResponse> getPresignedUrlForFile(
       @RequestParam("fileName") String fileName, @AuthenticationPrincipal OAuth2User principal) {
     PreSignedUrlResponse preSignedUrlResponse =
