@@ -43,4 +43,8 @@ aws:
       region: ${aws.region}
       table-name: ${DYNAMODB_TABLE_NAME}
 
+python:
+  module:
+    url: http://localhost:5000
+
 
