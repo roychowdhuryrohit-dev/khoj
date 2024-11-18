@@ -10,14 +10,24 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+  private final WebSocketAuthInterceptor authInterceptor;
+
+  public WebSocketConfig(WebSocketAuthInterceptor authInterceptor) {
+    this.authInterceptor = authInterceptor;
+  }
+
   @Override
   public void configureMessageBroker(MessageBrokerRegistry config) {
-    config.enableSimpleBroker("/topic");
-    config.setApplicationDestinationPrefixes("/app");
+    config.enableSimpleBroker("/topic"); // Server-to-client messages
+    config.setApplicationDestinationPrefixes("/app"); // Client-to-server messages
   }
 
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry.addEndpoint("/chat").setAllowedOrigins("*").withSockJS();
+    registry
+        .addEndpoint("/chat")
+        .setAllowedOrigins("*")
+        .addInterceptors(authInterceptor) // Add authentication interceptor
+        .withSockJS(); // Enable fallback options for browsers without WebSocket support
   }
 }

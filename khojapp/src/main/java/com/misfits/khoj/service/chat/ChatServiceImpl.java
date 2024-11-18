@@ -24,21 +24,21 @@ public class ChatServiceImpl implements ChatService {
     this.restTemplate = restTemplateBuilder.build();
   }
 
-  @Override
   public String startSession(String sessionId, List<String> fileUrls) {
-    AiModuleChatSessionRequest request = new AiModuleChatSessionRequest(sessionId, fileUrls);
+    AiModuleChatSessionRequest request =
+        new AiModuleChatSessionRequest(sessionId, fileUrls); // Include userId if needed
+
     ResponseEntity<AiModuleResponse> response =
         restTemplate.postForEntity(
             pythonModuleUrl + "/startSession", request, AiModuleResponse.class);
 
     if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-      return response.getBody().toString();
+      return response.getBody().getMessage();
     } else {
       throw new RuntimeException("Failed to start session with Python module");
     }
   }
 
-  @Override
   public String sendQuery(String sessionId, String prompt) {
     ChatMessage request = new ChatMessage();
     request.setSessionId(sessionId);
