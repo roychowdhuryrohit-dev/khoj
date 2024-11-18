@@ -41,7 +41,7 @@ public class ChatController {
       @RequestBody ChatSessionRequest request, @AuthenticationPrincipal OAuth2User principal) {
 
     String userId = userService.getUserId(principal);
-    String sessionId = UUID.randomUUID().toString();
+    String sessionId = userService.getUserId(principal);
     sessionStore.saveSession(userId, sessionId);
     List<String> fileUrls =
         s3FileService.generatePresignedUrlsForUserFiles(
