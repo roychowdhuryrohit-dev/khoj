@@ -24,7 +24,7 @@ public class ChatServiceImpl implements ChatService {
     this.restTemplate = restTemplateBuilder.build();
   }
 
-  public String startSession(String sessionId, List<String> fileUrls) {
+  public AiModuleResponse startSession(String sessionId, List<String> fileUrls) {
     AiModuleChatSessionRequest request =
         new AiModuleChatSessionRequest(sessionId, fileUrls); // Include userId if needed
 
@@ -32,8 +32,10 @@ public class ChatServiceImpl implements ChatService {
         restTemplate.postForEntity(
             pythonModuleUrl + "/startSession", request, AiModuleResponse.class);
 
+    AiModuleResponse aiModuleResponse = response.getBody();
+
     if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-      return response.getBody().getMessage();
+      return aiModuleResponse;
     } else {
       throw new RuntimeException("Failed to start session with Python module");
     }

@@ -1,6 +1,10 @@
 package com.misfits.khoj.model.chat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class AiModuleResponse {
+
+  @JsonProperty("message")
   private String message;
 
   public AiModuleResponse(String message) {

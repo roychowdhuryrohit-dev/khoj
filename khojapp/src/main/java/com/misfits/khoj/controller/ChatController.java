@@ -49,8 +49,7 @@ public class ChatController {
     List<String> fileUrls =
         s3FileService.generatePresignedUrlsForUserFiles(
             request.getFilenames(), userService.getUserId(principal));
-    String response = chatService.startSession(sessionId, fileUrls);
-    AiModuleResponse aiModuleResponse = new AiModuleResponse(response);
+    AiModuleResponse aiModuleResponse = chatService.startSession(sessionId, fileUrls);
     return ResponseEntity.ok(aiModuleResponse);
   }
 }
