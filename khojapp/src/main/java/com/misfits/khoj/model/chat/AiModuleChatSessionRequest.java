@@ -4,27 +4,27 @@ import java.util.List;
 
 public class AiModuleChatSessionRequest {
 
-  private String sessionId;
-  private List<String> fileUrls;
+  private String session_id;
+  private List<String> file_urls;
 
-  public AiModuleChatSessionRequest(String sessionId, List<String> fileUrls) {
-    this.sessionId = sessionId;
-    this.fileUrls = fileUrls;
+  public AiModuleChatSessionRequest(String session_id, List<String> file_urls) {
+    this.session_id = session_id;
+    this.file_urls = file_urls;
   }
 
-  public String getSessionId() {
-    return sessionId;
+  public String getSession_id() {
+    return session_id;
   }
 
-  public void setSessionId(String sessionId) {
-    this.sessionId = sessionId;
+  public void setSession_id(String session_id) {
+    this.session_id = session_id;
   }
 
-  public List<String> getFileUrls() {
-    return fileUrls;
+  public List<String> getFile_urls() {
+    return file_urls;
   }
 
-  public void setFileUrls(List<String> fileUrls) {
-    this.fileUrls = fileUrls;
+  public void setFile_urls(List<String> file_urls) {
+    this.file_urls = file_urls;
   }
 }

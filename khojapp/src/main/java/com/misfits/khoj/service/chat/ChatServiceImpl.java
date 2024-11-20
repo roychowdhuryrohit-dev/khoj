@@ -41,7 +41,7 @@ public class ChatServiceImpl implements ChatService {
 
   public String sendQuery(String sessionId, String prompt) {
     ChatMessage request = new ChatMessage();
-    request.setSessionId(sessionId);
+    request.setSession_id(sessionId);
     request.setPrompt(prompt);
 
     ResponseEntity<AiModuleResponse> response =

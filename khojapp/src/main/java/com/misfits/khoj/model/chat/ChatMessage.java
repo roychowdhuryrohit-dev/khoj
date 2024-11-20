@@ -2,16 +2,16 @@ package com.misfits.khoj.model.chat;
 
 public class ChatMessage {
 
-  private String sessionId;
+  private String session_id;
   private String prompt;
 
   // Getters and Setters
-  public String getSessionId() {
-    return sessionId;
+  public String getSession_id() {
+    return session_id;
   }
 
-  public void setSessionId(String sessionId) {
-    this.sessionId = sessionId;
+  public void setSession_id(String session_id) {
+    this.session_id = session_id;
   }
 
   public String getPrompt() {

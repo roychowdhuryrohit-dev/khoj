@@ -32,11 +32,11 @@ public class WebSocketController {
     String storedSessionId = sessionStore.getSessionId(userId);
 
     // Step 3: Validate the sessionId
-    if (!message.getSessionId().equals(storedSessionId)) {
+    if (!message.getSession_id().equals(storedSessionId)) {
       throw new IllegalArgumentException("Invalid sessionId for user: " + userId);
     }
 
     // Step 4: Process the query via the ChatService
-    return chatService.sendQuery(message.getSessionId(), message.getPrompt());
+    return chatService.sendQuery(message.getSession_id(), message.getPrompt());
   }
 }
