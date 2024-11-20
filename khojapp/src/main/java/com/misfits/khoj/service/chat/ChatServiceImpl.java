@@ -28,11 +28,10 @@ public class ChatServiceImpl implements ChatService {
     AiModuleChatSessionRequest request =
         new AiModuleChatSessionRequest(sessionId, fileUrls); // Include userId if needed
 
-    ResponseEntity<AiModuleResponse> response =
-        restTemplate.postForEntity(
-            pythonModuleUrl + "/startSession", request, AiModuleResponse.class);
+    ResponseEntity<String> response =
+        restTemplate.postForEntity(pythonModuleUrl + "/startSession", request, String.class);
 
-    AiModuleResponse aiModuleResponse = response.getBody();
+    AiModuleResponse aiModuleResponse = new AiModuleResponse(response.getBody());
 
     if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
       return aiModuleResponse;
@@ -41,16 +40,18 @@ public class ChatServiceImpl implements ChatService {
     }
   }
 
-  public String sendQuery(String sessionId, String prompt) {
+  public AiModuleResponse sendQuery(String sessionId, String prompt) {
     ChatMessage request = new ChatMessage();
     request.setSession_id(sessionId);
     request.setPrompt(prompt);
 
-    ResponseEntity<AiModuleResponse> response =
-        restTemplate.postForEntity(pythonModuleUrl + "/sendQuery", request, AiModuleResponse.class);
+    ResponseEntity<String> response =
+        restTemplate.postForEntity(pythonModuleUrl + "/sendQuery", request, String.class);
+
+    AiModuleResponse aiModuleResponse = new AiModuleResponse(response.getBody());
 
     if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-      return response.getBody().getMessage();
+      return aiModuleResponse;
     } else {
       throw new RuntimeException("Failed to send query to Python module");
     }

@@ -1,5 +1,6 @@
 package com.misfits.khoj.controller;
 
+import com.misfits.khoj.model.chat.AiModuleResponse;
 import com.misfits.khoj.model.chat.ChatMessage;
 import com.misfits.khoj.model.chat.SessionStore;
 import com.misfits.khoj.service.ChatService;
@@ -23,7 +24,8 @@ public class WebSocketController {
 
   @MessageMapping("/sendMessage")
   @SendTo("/topic/messages")
-  public String handleMessage(ChatMessage message, @AuthenticationPrincipal OAuth2User principal) {
+  public AiModuleResponse handleMessage(
+      ChatMessage message, @AuthenticationPrincipal OAuth2User principal) {
     // Step 1: Get userId from the authenticated principal
     String userId =
         principal.getAttribute("sub"); // Or use your custom userService.getUserId(principal)

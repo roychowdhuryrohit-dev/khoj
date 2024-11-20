@@ -6,5 +6,5 @@ import java.util.List;
 public interface ChatService {
   AiModuleResponse startSession(String sessionId, List<String> fileUrls);
 
-  String sendQuery(String sessionId, String prompt);
+  AiModuleResponse sendQuery(String sessionId, String prompt);
 }
