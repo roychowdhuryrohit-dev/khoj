@@ -1,0 +1,13 @@
+services:
+  redis:
+    container_name: redis
+    hostname: redis
+    image: redis/redis-stack-server:7.4.0-v1
+    volumes:
+      - ./data:/data
+    command: [ "/entrypoint.sh", "./conf/redis-stack.conf" ]
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+    ports:
+      - 6379:6379
+
