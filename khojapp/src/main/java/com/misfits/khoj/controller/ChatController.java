@@ -1,12 +1,13 @@
 package com.misfits.khoj.controller;
 
+import com.misfits.khoj.model.chat.AiModuleResponse;
 import com.misfits.khoj.model.chat.ChatSessionRequest;
 import com.misfits.khoj.model.chat.SessionStore;
 import com.misfits.khoj.service.ChatService;
 import com.misfits.khoj.service.S3FileService;
 import com.misfits.khoj.service.UserService;
 import java.util.List;
-import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 public class ChatController {
 
@@ -37,16 +39,18 @@ public class ChatController {
   }
 
   @PostMapping("/startChatSession")
-  public ResponseEntity<String> startChatSession(
+  public ResponseEntity<AiModuleResponse> startChatSession(
       @RequestBody ChatSessionRequest request, @AuthenticationPrincipal OAuth2User principal) {
 
     String userId = userService.getUserId(principal);
     String sessionId = userService.getUserId(principal);
     sessionStore.saveSession(userId, sessionId);
+    log.info("Session ID: {} , UserId {}, request: {} ", sessionId, userId, request.toString());
     List<String> fileUrls =
         s3FileService.generatePresignedUrlsForUserFiles(
             request.getFilenames(), userService.getUserId(principal));
     String response = chatService.startSession(sessionId, fileUrls);
-    return ResponseEntity.ok(response);
+    AiModuleResponse aiModuleResponse = new AiModuleResponse(response);
+    return ResponseEntity.ok(aiModuleResponse);
   }
 }
