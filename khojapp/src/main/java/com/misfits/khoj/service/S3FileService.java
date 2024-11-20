@@ -16,4 +16,6 @@ public interface S3FileService {
   ListUserFilesResponse listUserFiles(String userId);
 
   PreSignedUrlResponse getPresignedUrlForFile(String fileName, String userId);
+
+  List<String> generatePresignedUrlsForUserFiles(List<String> filenames, String userId);
 }

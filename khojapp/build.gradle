@@ -23,6 +23,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.security:spring-security-oauth2-resource-server:6.1.0'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-json'
+	implementation 'org.springframework:spring-web'
 
 	implementation 'software.amazon.awssdk:cognitoidentityprovider:2.29.6'
 	implementation 'software.amazon.awssdk:http-auth-aws:2.29.6'

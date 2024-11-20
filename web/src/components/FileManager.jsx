@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Upload, RefreshCw, Download } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Upload, RefreshCw, Download, MessageSquare } from 'lucide-react'
 
 const IconButton = ({ onClick, disabled, children, className }) => (
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`p-2 bg-black text-white rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+    className={`p-2 bg-black text-white rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10 flex items-center justify-center ${className}`}
   >
     {children}
   </button>
@@ -16,6 +17,9 @@ export default function FileManager() {
   const [isUploading, setIsUploading] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [downloadingFile, setDownloadingFile] = useState(null)
+  const [selectedFiles, setSelectedFiles] = useState([])
+  const [isChatMode, setIsChatMode] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetchFiles()
@@ -63,6 +67,10 @@ export default function FileManager() {
   }
 
   const handleFileDownload = async (filename) => {
+    if (isChatMode) {
+      toggleFileSelection(filename)
+      return
+    }
     setDownloadingFile(filename)
     try {
       const response = await fetch(`/getPreSignedUrl?fileName=${encodeURIComponent(filename)}`)
@@ -87,14 +95,45 @@ export default function FileManager() {
     setDownloadingFile(null)
   }
 
+  const toggleFileSelection = (filename) => {
+    setSelectedFiles(prev => 
+      prev.includes(filename) 
+        ? prev.filter(f => f !== filename) 
+        : [...prev, filename]
+    )
+    console.log(filename)
+  }
+
+  const handleStartChat = async () => {
+    try {
+      const response = await fetch('/startChatSession', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filenames: selectedFiles }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        navigate('/chat', { state: { message: data.message } })
+      } else {
+        console.error('Failed to start chat session')
+      }
+    } catch (error) {
+      console.error('Error starting chat session:', error)
+    }
+  }
+
   return (
     <div className="relative min-h-[300px]">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {files.map((file, index) => (
           <div
             key={index}
-            className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative"
-            onClick={() => handleFileDownload(file[0])}
+            className={`p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative ${selectedFiles.includes(file) ? 'bg-gray-200 text-gray-600' : ''
+              }`}
+            onClick={() => isChatMode ? toggleFileSelection(file[0]) : handleFileDownload(file[0])}
           >
             <p className="text-sm truncate">{file[0]}</p>
             {downloadingFile === file[0] && (
@@ -110,22 +149,42 @@ export default function FileManager() {
         <p className="text-center text-gray-500 mt-8">No PDF files uploaded yet.</p>
       )}
 
-      <div className="fixed bottom-4 right-4 flex flex-col gap-2 p-2 bg-white bg-opacity-50 rounded-lg">
-        <IconButton onClick={fetchFiles} disabled={isRefreshing}>
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+<div className="fixed bottom-4 right-4 flex items-end gap-2 p-2 bg-white bg-opacity-50 rounded-lg">
+        {isChatMode ? (
+          <div className="flex-1">
+          <button
+            onClick={handleStartChat}
+            disabled={selectedFiles.length === 0}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Start Chatting ({selectedFiles.length})
+          </button>
+          </div>
+        ) : (
+          <>
+            <IconButton onClick={fetchFiles} disabled={isRefreshing}>
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </IconButton>
+            <div className="relative">
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handleFileUpload}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                disabled={isUploading}
+              />
+              <IconButton disabled={isUploading}>
+                <Upload className={`h-4 w-4 ${isUploading ? 'animate-pulse' : ''}`} />
+              </IconButton>
+            </div>
+          </>
+        )}
+        <IconButton
+          onClick={() => setIsChatMode(!isChatMode)}
+          className={isChatMode ? 'bg-blue-500 hover:bg-blue-600' : ''}
+        >
+          <MessageSquare className="h-4 w-4" />
         </IconButton>
-        <div className="relative">
-          <input
-            type="file"
-            accept=".pdf"
-            onChange={handleFileUpload}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            disabled={isUploading}
-          />
-          <IconButton disabled={isUploading}>
-            <Upload className={`h-4 w-4 ${isUploading ? 'animate-pulse' : ''}`} />
-          </IconButton>
-        </div>
       </div>
     </div>
   )

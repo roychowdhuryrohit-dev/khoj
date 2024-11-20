@@ -22,6 +22,7 @@ import com.misfits.khoj.utils.KhojUtils;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -241,6 +242,31 @@ public class S3FileServiceImpl implements S3FileService {
       throw new PresignedUrlGenerationException(
           "Unexpected error occurred while generating presigned URL", ex);
     }
+  }
+
+  @Override
+  public List<String> generatePresignedUrlsForUserFiles(List<String> filenames, String userId) {
+    validateUserIdNotNull(userId);
+    log.info(
+        "Received request to generate PreSigned URLs selected by userId {} for files {}",
+        userId,
+        filenames);
+
+    return filenames.stream()
+        .map(
+            fileName -> {
+              try {
+                return getPresignedUrlForFile(fileName, userId).getPreSignedUrl();
+              } catch (Exception ex) {
+                log.error(
+                    "Failed to generate PreSigned URL for file: {}. Skipping this file",
+                    fileName,
+                    ex);
+                return null;
+              }
+            })
+        .filter(Objects::nonNull)
+        .toList();
   }
 
   private String getFileKey(String fileName, String userId) {
