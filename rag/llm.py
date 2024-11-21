@@ -96,12 +96,13 @@ def new_chat_engine(
 ) -> BaseChatEngine:
     global chat_store
     data = load_data(file_urls)
-
+    storage_context.index_store.delete_index_struct(session_id)
     index = VectorStoreIndex.from_documents(
         data,
         embed_model=embedding,
         storage_context=storage_context,
     )
+
     index.set_index_id(session_id)
 
     chat_store.delete_messages(session_id)
