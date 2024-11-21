@@ -36,8 +36,7 @@ public class KhojUtils {
 
   public static String validateUserIdNotNull(String userId) {
     try {
-      log.info("Validating userID");
-      if (userId == null) {
+      if (userId == null || userId.isEmpty()) {
         throw new MissingUserAttributeException("User ID supplied cannot be null");
       }
       return userId;

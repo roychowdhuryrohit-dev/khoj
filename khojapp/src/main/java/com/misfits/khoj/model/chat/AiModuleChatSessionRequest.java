@@ -27,4 +27,15 @@ public class AiModuleChatSessionRequest {
   public void setFile_urls(List<String> file_urls) {
     this.file_urls = file_urls;
   }
+
+  @Override
+  public String toString() {
+    return "AiModuleChatSessionRequest{"
+        + "session_id='"
+        + session_id
+        + '\''
+        + ", file_urls="
+        + file_urls
+        + '}';
+  }
 }

@@ -46,19 +46,16 @@ public class UserServiceImpl implements UserService {
   public UserProfile getUserProfile(OAuth2User principal) {
     try {
 
-      // Check if the user is authenticated
       if (principal == null) {
         throw new UserNotAuthenticatedException(
             "User is not authenticated, Principal is null in getUserProfile.");
       }
 
-      // Retrieve and validate required attributes
       Map<String, Object> attributes = principal.getAttributes();
       validateAttribute(attributes, SUB, "User ID (sub) is missing or blank.");
       validateAttribute(attributes, EMAIL, "Email is missing or blank.");
       validateAttribute(attributes, NAME, "Name is missing or blank.");
 
-      // Create and log the UserProfile
       UserProfile userProfile = new UserProfile(attributes);
       log.info("User profile retrieved: {}", userProfile);
       return userProfile;
@@ -69,8 +66,7 @@ public class UserServiceImpl implements UserService {
           "Failed retrieving user profile details .", String.valueOf(ex));
 
     } catch (Exception ex) {
-      // Catch any unexpected exceptions
-      log.error("An unexpected error occurred while retrieving user profile", ex);
+      log.error("An Error occurred while retrieving user profile", ex);
       throw new UserProfileException("An unexpected error occurred.", String.valueOf(ex));
     }
   }

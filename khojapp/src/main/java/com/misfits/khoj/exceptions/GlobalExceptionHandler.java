@@ -1,5 +1,8 @@
 package com.misfits.khoj.exceptions;
 
+import com.misfits.khoj.exceptions.chat.JsonParsingException;
+import com.misfits.khoj.exceptions.chat.QueryExecutionException;
+import com.misfits.khoj.exceptions.chat.SessionStartException;
 import com.misfits.khoj.exceptions.file.FileListingException;
 import com.misfits.khoj.exceptions.file.FileUploadException;
 import com.misfits.khoj.exceptions.file.s3.InvalidPresignedUrlRequestException;
@@ -156,6 +159,36 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         "DynamoDB Error",
         ex.getMessage(),
         request.getRequestURI());
+  }
+
+  @ExceptionHandler(SessionStartException.class)
+  public ResponseEntity<ErrorResponse> handleSessionStartException(
+      SessionStartException ex, HttpServletRequest request) {
+    logger.error("SessionStartException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "AI Chat Session Start Error",
+        ex.getMessage(),
+        request.getRequestURI());
+  }
+
+  @ExceptionHandler(QueryExecutionException.class)
+  public ResponseEntity<ErrorResponse> handleQueryExecutionException(
+      QueryExecutionException ex, HttpServletRequest request) {
+    logger.error("QueryExecutionException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "AI Query Execution Error",
+        ex.getMessage(),
+        request.getRequestURI());
+  }
+
+  @ExceptionHandler(JsonParsingException.class)
+  public ResponseEntity<ErrorResponse> handleJsonParsingException(
+      JsonParsingException ex, HttpServletRequest request) {
+    logger.error("JsonParsingException occurred:", ex);
+    return buildErrorResponse(
+        HttpStatus.BAD_REQUEST, "JSON Parsing Error", ex.getMessage(), request.getRequestURI());
   }
 
   private ResponseEntity<ErrorResponse> buildErrorResponse(

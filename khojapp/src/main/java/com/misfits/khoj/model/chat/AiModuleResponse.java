@@ -1,10 +1,7 @@
 package com.misfits.khoj.model.chat;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class AiModuleResponse {
 
-  // @JsonProperty("message")
   private String message;
 
   public String getMessage() {
@@ -13,5 +10,10 @@ public class AiModuleResponse {
 
   public void setMessage(String message) {
     this.message = message;
+  }
+
+  @Override
+  public String toString() {
+    return "AiModuleResponse{" + "message='" + message + '\'' + '}';
   }
 }

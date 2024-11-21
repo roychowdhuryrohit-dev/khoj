@@ -15,4 +15,9 @@ public class ChatSessionRequest {
   public void setFilenames(List<String> filenames) {
     this.filenames = filenames;
   }
+
+  @Override
+  public String toString() {
+    return "ChatSessionRequest{" + "filenames=" + filenames + '}';
+  }
 }
