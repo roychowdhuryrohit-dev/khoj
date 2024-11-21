@@ -116,6 +116,7 @@ export default function FileManager() {
 
       if (response.ok) {
         const data = await response.json()
+        console.log(data.message)
         navigate('/chat', { state: { message: data.message } })
       } else {
         console.error('Failed to start chat session')
@@ -131,7 +132,7 @@ export default function FileManager() {
         {files.map((file, index) => (
           <div
             key={index}
-            className={`p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative ${selectedFiles.includes(file) ? 'bg-gray-200 text-gray-600' : ''
+            className={`p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative ${selectedFiles.includes(file[0]) ? 'bg-gray-300 text-gray-600' : ''
               }`}
             onClick={() => isChatMode ? toggleFileSelection(file[0]) : handleFileDownload(file[0])}
           >
