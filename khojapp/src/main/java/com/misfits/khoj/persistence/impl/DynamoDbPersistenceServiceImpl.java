@@ -28,7 +28,7 @@ public class DynamoDbPersistenceServiceImpl implements DynamoDbPersistenceServic
   public void saveUserProfileDetails(
       String tableName, String userId, UserProfileDetails userProfileDetails) {
     try {
-      // Validate the user data
+
       if (userId == null || userId.isEmpty()) {
         throw new UserDataValidationException("User ID cannot be null or empty");
       }
@@ -51,7 +51,7 @@ public class DynamoDbPersistenceServiceImpl implements DynamoDbPersistenceServic
       throw new UserPersistSaveException("Error persisting user to DynamoDB", e);
 
     } catch (UserDataValidationException | UserDataSerializationException e) {
-      throw e; // Rethrow to propagate the specific error
+      throw e;
 
     } catch (Exception e) {
       log.error("Unexpected error for user {}: {}", userId, e.getMessage());
@@ -62,7 +62,7 @@ public class DynamoDbPersistenceServiceImpl implements DynamoDbPersistenceServic
   @Override
   public boolean checkIfUserExists(String tableName, String userId) {
     Map<String, AttributeValue> keyToGet = new HashMap<>();
-    keyToGet.put("id", AttributeValue.builder().s(userId).build());
+    keyToGet.put(ID, AttributeValue.builder().s(userId).build());
 
     GetItemRequest request = GetItemRequest.builder().tableName(tableName).key(keyToGet).build();
 
