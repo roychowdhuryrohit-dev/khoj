@@ -46,7 +46,7 @@ public class ChatServiceImpl implements ChatService {
       log.info("Sending request to AI module to start chat session for sessionId: {}", sessionId);
       ResponseEntity<String> response =
           restTemplate.postForEntity(
-              "https://784f-2601-647-6881-9160-14cf-974e-375a-fbdb.ngrok-free.app"
+              pythonModuleUrl
                   + "/startSession",
               request,
               String.class);
@@ -85,7 +85,7 @@ public class ChatServiceImpl implements ChatService {
     try {
       ResponseEntity<String> response =
           restTemplate.postForEntity(
-              "https://784f-2601-647-6881-9160-14cf-974e-375a-fbdb.ngrok-free.app" + "/sendQuery",
+              pythonModuleUrl + "/sendQuery",
               chatMessageRequest,
               String.class);
 
