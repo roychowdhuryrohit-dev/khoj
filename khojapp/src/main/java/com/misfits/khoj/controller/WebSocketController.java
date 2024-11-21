@@ -32,7 +32,7 @@ public class WebSocketController {
   public AiModuleResponse handleMessage(ChatMessage chatMessage, Principal principal) {
     try {
 
-      log.info("Received chatMessage {} for processing from AI module", chatMessage);
+      log.info("Received chatMessage for processing from AI module");
 
       if (principal == null) {
         log.error("User authentication failed: Principal is null.");
@@ -42,6 +42,7 @@ public class WebSocketController {
       Authentication authentication = (Authentication) principal;
       OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
       String userId = oauth2User.getAttribute(ApplicationConstants.SUB);
+      chatMessage.setSession_id(userId);
       validateUserIdNotNull(userId);
 
       AiModuleResponse response = chatService.sendQuery(userId, chatMessage.getPrompt());
