@@ -4,12 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AiModuleResponse {
 
-  @JsonProperty("message")
+  // @JsonProperty("message")
   private String message;
-
-  public AiModuleResponse(String message) {
-    this.message = message;
-  }
 
   public String getMessage() {
     return message;

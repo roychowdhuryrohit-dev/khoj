@@ -96,34 +96,15 @@ export default function FileManager() {
   }
 
   const toggleFileSelection = (filename) => {
-    setSelectedFiles(prev => 
-      prev.includes(filename) 
-        ? prev.filter(f => f !== filename) 
+    setSelectedFiles(prev =>
+      prev.includes(filename)
+        ? prev.filter(f => f !== filename)
         : [...prev, filename]
     )
-    console.log(filename)
   }
 
-  const handleStartChat = async () => {
-    try {
-      const response = await fetch('/startChatSession', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ filenames: selectedFiles }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        console.log(data.message)
-        navigate('/chat', { state: { message: data.message } })
-      } else {
-        console.error('Failed to start chat session')
-      }
-    } catch (error) {
-      console.error('Error starting chat session:', error)
-    }
+  const handleStartChat = () => {
+    navigate('/chat', { state: { selectedFiles } })
   }
 
   return (
@@ -150,16 +131,16 @@ export default function FileManager() {
         <p className="text-center text-gray-500 mt-8">No PDF files uploaded yet.</p>
       )}
 
-<div className="fixed bottom-4 right-4 flex items-end gap-2 p-2 bg-white bg-opacity-50 rounded-lg">
+      <div className="fixed bottom-4 right-4 flex items-end gap-2 p-2 bg-white bg-opacity-50 rounded-lg">
         {isChatMode ? (
           <div className="flex-1">
-          <button
-            onClick={handleStartChat}
-            disabled={selectedFiles.length === 0}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Start Chatting ({selectedFiles.length})
-          </button>
+            <button
+              onClick={handleStartChat}
+              disabled={selectedFiles.length === 0}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Start Chatting ({selectedFiles.length})
+            </button>
           </div>
         ) : (
           <>

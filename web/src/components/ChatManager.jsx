@@ -1,55 +1,108 @@
-import { useState, useEffect } from 'react'
-import { useLocation, Link } from 'react-router-dom'
+import React, { useState, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
+import SockJS from 'sockjs-client'
+import Stomp from 'stompjs'
+import ReactMarkdown from 'react-markdown'
+import { Send } from 'lucide-react'
+
+const ChatBubble = ({ message, isServer }) => (
+  <div className={`mb-4 ${isServer ? 'text-left' : 'text-right'}`}>
+    <div
+      className={`inline-block p-3 rounded-lg ${
+        isServer ? 'bg-black text-white' : 'bg-white text-black border border-gray-300'
+      }`}
+    >
+      <ReactMarkdown>{message}</ReactMarkdown>
+    </div>
+  </div>
+)
+
+const LoadingBubble = () => (
+  <div className="mb-4 text-left">
+    <div className="inline-block p-3 rounded-lg bg-black text-white">
+      <span className="animate-pulse">...</span>
+    </div>
+  </div>
+)
 
 export default function ChatManager() {
   const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
   const location = useLocation()
+  const stompClient = useRef(null)
 
   useEffect(() => {
     const { state } = location
-    if (state && state.message) {
-      setMessages([{ text: state.message, isBot: true }])
+    if (state && state.selectedFiles) {
+      createChatSession(state.selectedFiles)
+    }
+
+    // Initialize SockJS and STOMP client
+    const socket = new SockJS('/chat') 
+    stompClient.current = Stomp.over(socket)
+
+    stompClient.current.connect({}, () => {
+      console.log('Connected to STOMP')
+      stompClient.current.subscribe('/topic/messages', (message) => {
+        const receivedMessage = JSON.parse(message.body)
+        setMessages((prev) => [...prev, { text: receivedMessage.message, isServer: true }])
+        setIsLoading(false)
+      })
+    }, (error) => {
+      console.error('STOMP error:', error)
+    })
+
+    return () => {
+      if (stompClient.current) {
+        stompClient.current.disconnect()
+      }
     }
   }, [location])
 
+  const createChatSession = async (selectedFiles) => {
+    try {
+      const response = await fetch('/startChatSession', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filenames: selectedFiles }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setMessages([{ text: data.message, isServer: true }])
+      } else {
+        console.error('Failed to start chat session')
+        setMessages([{ text: "Failed to start chat session. Please try again.", isServer: true }])
+      }
+    } catch (error) {
+      console.error('Error starting chat session:', error)
+      setMessages([{ text: "An error occurred while starting the chat session. Please try again.", isServer: true }])
+    }
+    setIsLoading(false)
+  }
+
   const handleSendMessage = (e) => {
     e.preventDefault()
-    if (inputMessage.trim()) {
-      setMessages(prev => [...prev, { text: inputMessage, isBot: false }])
+    if (inputMessage.trim() && !isLoading) {
+      setMessages((prev) => [...prev, { text: inputMessage, isServer: false }])
+      setIsLoading(true)
+      stompClient.current.send("/app/sendMessage", {}, JSON.stringify({ prompt: inputMessage }))
       setInputMessage('')
-      // Here you would typically send the message to your backend
-      // and then add the response to the messages
     }
   }
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Chat with Your Documents</h1>
-        <Link to="/" className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
-          Back to Files
-        </Link>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4 border rounded-lg">
+      <div className="flex-1 overflow-y-auto p-4 pb-20">
         {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`mb-4 ${
-              message.isBot ? 'text-left' : 'text-right'
-            }`}
-          >
-            <div
-              className={`inline-block p-2 rounded-lg ${
-                message.isBot ? 'bg-gray-200' : 'bg-blue-500 text-white'
-              }`}
-            >
-              {message.text}
-            </div>
-          </div>
+          <ChatBubble key={index} message={message.text} isServer={message.isServer} />
         ))}
+        {isLoading && <LoadingBubble />}
       </div>
-      <form onSubmit={handleSendMessage} className="mt-4">
+      <form onSubmit={handleSendMessage} className="p-4 border-t sticky bottom-0 bg-white">
         <div className="flex">
           <input
             type="text"
@@ -57,12 +110,14 @@ export default function ChatManager() {
             onChange={(e) => setInputMessage(e.target.value)}
             className="flex-1 p-2 border rounded-l-md"
             placeholder="Type your message..."
+            disabled={isLoading}
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600"
+            className="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading || !inputMessage.trim()}
           >
-            Send
+            <Send className="h-5 w-5" />
           </button>
         </div>
       </form>

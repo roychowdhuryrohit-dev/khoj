@@ -26,8 +26,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry
         .addEndpoint("/chat")
-        .setAllowedOrigins("*")
-        .addInterceptors(authInterceptor) // Add authentication interceptor
+        .setAllowedOrigins("http://localhost:8080", "http://localhost:8081") // Allow both origins
+        .addInterceptors(authInterceptor)
         .withSockJS(); // Enable fallback options for browsers without WebSocket support
   }
 }

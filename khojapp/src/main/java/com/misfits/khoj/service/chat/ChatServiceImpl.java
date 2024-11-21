@@ -30,17 +30,20 @@ public class ChatServiceImpl implements ChatService {
   }
 
   public AiModuleResponse startSession(String sessionId, List<String> fileUrls) {
-    AiModuleChatSessionRequest request =
-        new AiModuleChatSessionRequest(sessionId, fileUrls); // Include userId if needed
+    AiModuleChatSessionRequest request = new AiModuleChatSessionRequest(sessionId, fileUrls); // Include userId if
+                                                                                              // needed
 
-    ResponseEntity<String> response =
-        restTemplate.postForEntity(pythonModuleUrl + "/startSession", request, String.class);
+    ResponseEntity<String> response = restTemplate.postForEntity(pythonModuleUrl + "/startSession", request,
+        String.class);
 
     if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
       try {
+        // Manually parse the String response to AiModuleResponse
+        ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(response.getBody(), AiModuleResponse.class);
       } catch (JsonProcessingException e) {
-        throw new RuntimeException("Failed to parse JSON response while session from AI module", e);
+        System.err.println("Failed to parse JSON: " + response.getBody());
+        throw new RuntimeException("Failed to parse JSON response", e);
       }
     } else {
       throw new RuntimeException("Failed to start session with Python module");
@@ -52,8 +55,7 @@ public class ChatServiceImpl implements ChatService {
     request.setSession_id(sessionId);
     request.setPrompt(prompt);
 
-    ResponseEntity<String> response =
-        restTemplate.postForEntity(pythonModuleUrl + "/sendQuery", request, String.class);
+    ResponseEntity<String> response = restTemplate.postForEntity(pythonModuleUrl + "/sendQuery", request, String.class);
 
     if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
       try {
