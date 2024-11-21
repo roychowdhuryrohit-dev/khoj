@@ -1,5 +1,7 @@
 package com.misfits.khoj.service.chat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.misfits.khoj.model.chat.AiModuleChatSessionRequest;
 import com.misfits.khoj.model.chat.AiModuleResponse;
 import com.misfits.khoj.model.chat.ChatMessage;
@@ -20,8 +22,11 @@ public class ChatServiceImpl implements ChatService {
   @Value("${python.module.url}")
   private String pythonModuleUrl;
 
-  public ChatServiceImpl(RestTemplateBuilder restTemplateBuilder) {
+  private final ObjectMapper objectMapper;
+
+  public ChatServiceImpl(RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
     this.restTemplate = restTemplateBuilder.build();
+    this.objectMapper = objectMapper;
   }
 
   public AiModuleResponse startSession(String sessionId, List<String> fileUrls) {
@@ -31,10 +36,12 @@ public class ChatServiceImpl implements ChatService {
     ResponseEntity<String> response =
         restTemplate.postForEntity(pythonModuleUrl + "/startSession", request, String.class);
 
-    AiModuleResponse aiModuleResponse = new AiModuleResponse(response.getBody());
-
     if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-      return aiModuleResponse;
+      try {
+        return objectMapper.readValue(response.getBody(), AiModuleResponse.class);
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException("Failed to parse JSON response while session from AI module", e);
+      }
     } else {
       throw new RuntimeException("Failed to start session with Python module");
     }
@@ -48,10 +55,12 @@ public class ChatServiceImpl implements ChatService {
     ResponseEntity<String> response =
         restTemplate.postForEntity(pythonModuleUrl + "/sendQuery", request, String.class);
 
-    AiModuleResponse aiModuleResponse = new AiModuleResponse(response.getBody());
-
     if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-      return aiModuleResponse;
+      try {
+        return objectMapper.readValue(response.getBody(), AiModuleResponse.class);
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException("Failed to parse JSON response while quering from AI module", e);
+      }
     } else {
       throw new RuntimeException("Failed to send query to Python module");
     }
