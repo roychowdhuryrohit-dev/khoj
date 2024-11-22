@@ -6,7 +6,7 @@ import './App.css'
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-[#fffdf0]">
+      <div className="min-h-screen bg-[#fffdf0] font-sans">
         <div className="container mx-auto p-4">
           <h1 className="text-4xl font-bold mb-4 text-gray-800">Khoj &#128373;</h1>
           <Routes>
