@@ -40,8 +40,7 @@ def load_data(url_list: list[str]) -> list[Document]:
                 output.write(result.read())
 
         loader = SimpleDirectoryReader(
-            temp_dir,
-            file_metadata=(lambda filename: {"file_name": filename})
+            temp_dir, file_metadata=(lambda filename: {"file_name": filename})
         )
         documents = loader.load_data()
     return documents

@@ -30,8 +30,8 @@ llm = None
 embedding = None
 redis_client = None
 chat_store = None
-storage_context = None
 verbose = False
+vector_dims = 0
 
 
 def init_llm(
@@ -62,11 +62,10 @@ def init_chat_store(redis_url, ttl=300) -> None:
     chat_store = RedisChatStore(redis_url=redis_url, redis_client=redis_client, ttl=ttl)
 
 
-def init_vector_store(vector_dims: int) -> None:
-    global storage_context
+def get_storage_context(session_id: str, overwrite: bool) -> StorageContext:
     custom_schema = IndexSchema.from_dict(
         {
-            "index": {"name": "redis_vector_store", "prefix": "doc"},
+            "index": {"name": session_id, "prefix": "doc"},
             "fields": [
                 {"type": "tag", "name": "id"},
                 {"type": "tag", "name": "doc_id"},
@@ -86,9 +85,9 @@ def init_vector_store(vector_dims: int) -> None:
     )
 
     vector_store = RedisVectorStore(
-        redis_client=redis_client, schema=custom_schema, overwrite=True
+        redis_client=redis_client, schema=custom_schema, overwrite=overwrite
     )
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    return StorageContext.from_defaults(vector_store=vector_store)
 
 
 def new_chat_engine(
@@ -96,14 +95,23 @@ def new_chat_engine(
 ) -> BaseChatEngine:
     global chat_store
     data = load_data(file_urls)
-    storage_context.index_store.delete_index_struct(session_id)
+
+    storage_context = get_storage_context(session_id=session_id, overwrite=True)
+
     index = VectorStoreIndex.from_documents(
         data,
         embed_model=embedding,
         storage_context=storage_context,
     )
-
+    
+    storage_context.index_store.delete_index_struct(session_id)
     index.set_index_id(session_id)
+
+    retriever = index.as_retriever(similarity_top_k=10000)
+
+    # retrieve all nodes
+    # all_nodes = retriever.retrieve("Whatever")
+    # [print(str(item.node) + "\n\n") for item in all_nodes]
 
     chat_store.delete_messages(session_id)
     chat_memory = ChatMemoryBuffer.from_defaults(
@@ -122,9 +130,9 @@ def new_chat_engine(
 
 
 def get_chat_engine(session_id: str, token_limit: int = 3000) -> BaseChatEngine:
-    index = load_index_from_storage(
-        storage_context=storage_context, index_id=session_id, embed_model=embedding
-    )
+    
+    storage_context = get_storage_context(session_id=session_id, overwrite=False)
+    index = VectorStoreIndex.from_vector_store(storage_context.vector_store, embed_model=embedding)
     chat_memory = ChatMemoryBuffer.from_defaults(
         token_limit=token_limit,
         chat_store=chat_store,
@@ -191,10 +199,10 @@ workflow = KhojChatEngineWorkflow(timeout=100)
 
 
 def init(config):
-    global verbose, workflow
+    global verbose, workflow, vector_dims
     verbose = True if int(config["VERBOSE"]) else False
     init_llm(llm_model=config["LLM_MODEL"])
     init_embedding(embed_model=config["EMBED_MODEL"])
     init_redis_client(config["REDIS_URL"])
     init_chat_store(config["REDIS_URL"], config.get("TTL", None))
-    init_vector_store(config["VECTOR_DIMS"])
+    vector_dims = int(config["VECTOR_DIMS"])

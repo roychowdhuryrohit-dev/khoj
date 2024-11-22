@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Upload, RefreshCw, Download, MessageSquare } from 'lucide-react'
 
 const IconButton = ({ onClick, disabled, children, className }) => (
   <button
-    onClick={onClick}
+    onClick={(e) => {
+      e.stopPropagation();
+      onClick(e);
+    }}
     disabled={disabled}
-    className={`p-2 bg-black text-white rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10 flex items-center justify-center ${className}`}
+    className={`p-2 bg-black text-white rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed w-12 h-12 flex items-center justify-center ${className}`}
   >
     {children}
   </button>
@@ -19,10 +22,22 @@ export default function FileManager() {
   const [downloadingFile, setDownloadingFile] = useState(null)
   const [selectedFiles, setSelectedFiles] = useState([])
   const [isChatMode, setIsChatMode] = useState(false)
+  const [downloadReadyFiles, setDownloadReadyFiles] = useState([])
   const navigate = useNavigate()
+  const fileGridRef = useRef(null)
 
   useEffect(() => {
     fetchFiles()
+    const handleClickOutside = (event) => {
+      if (fileGridRef.current && !fileGridRef.current.contains(event.target)) {
+        setDownloadReadyFiles([])
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
   }, [])
 
   const fetchFiles = async () => {
@@ -66,11 +81,20 @@ export default function FileManager() {
     }
   }
 
-  const handleFileDownload = async (filename) => {
+  const handleFileClick = async (filename) => {
     if (isChatMode) {
       toggleFileSelection(filename)
       return
     }
+
+    if (downloadReadyFiles.includes(filename)) {
+      handleFileDownload(filename)
+    } else {
+      setDownloadReadyFiles([...downloadReadyFiles, filename])
+    }
+  }
+
+  const handleFileDownload = async (filename) => {
     setDownloadingFile(filename)
     try {
       const response = await fetch(`/getPreSignedUrl?fileName=${encodeURIComponent(filename)}`)
@@ -93,6 +117,7 @@ export default function FileManager() {
       console.error('Error downloading file:', error)
     }
     setDownloadingFile(null)
+    setDownloadReadyFiles(downloadReadyFiles.filter(f => f !== filename))
   }
 
   const toggleFileSelection = (filename) => {
@@ -107,20 +132,33 @@ export default function FileManager() {
     navigate('/chat', { state: { selectedFiles } })
   }
 
+  const handleChatModeToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsChatMode(!isChatMode)
+    setDownloadReadyFiles([])
+    setSelectedFiles([])
+  }
+
   return (
     <div className="relative min-h-[300px]">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div ref={fileGridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {files.map((file, index) => (
           <div
             key={index}
             className={`p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative ${selectedFiles.includes(file[0]) ? 'bg-gray-300 text-gray-600' : ''
               }`}
-            onClick={() => isChatMode ? toggleFileSelection(file[0]) : handleFileDownload(file[0])}
+            onClick={() => handleFileClick(file[0])}
           >
             <p className="text-sm truncate">{file[0]}</p>
             {downloadingFile === file[0] && (
               <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
                 <Download className="h-6 w-6 text-white animate-pulse" />
+              </div>
+            )}
+            {downloadReadyFiles.includes(file[0]) && !downloadingFile && (
+              <div className="absolute top-2 right-2">
+                <Download className="h-4 w-4 text-gray-500" />
               </div>
             )}
           </div>
@@ -137,7 +175,7 @@ export default function FileManager() {
             <button
               onClick={handleStartChat}
               disabled={selectedFiles.length === 0}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-xl"
             >
               Start Chatting ({selectedFiles.length})
             </button>
@@ -145,7 +183,7 @@ export default function FileManager() {
         ) : (
           <>
             <IconButton onClick={fetchFiles} disabled={isRefreshing}>
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
             </IconButton>
             <div className="relative">
               <input
@@ -156,18 +194,20 @@ export default function FileManager() {
                 disabled={isUploading}
               />
               <IconButton disabled={isUploading}>
-                <Upload className={`h-4 w-4 ${isUploading ? 'animate-pulse' : ''}`} />
+                <Upload className={`h-5 w-5 ${isUploading ? 'animate-pulse' : ''}`} />
               </IconButton>
             </div>
           </>
         )}
+
         <IconButton
-          onClick={() => setIsChatMode(!isChatMode)}
+          onClick={handleChatModeToggle}
           className={isChatMode ? 'bg-blue-500 hover:bg-blue-600' : ''}
         >
-          <MessageSquare className="h-4 w-4" />
+          <MessageSquare className="h-5 w-5" />
         </IconButton>
+
       </div>
-    </div>
+    </div >
   )
 }

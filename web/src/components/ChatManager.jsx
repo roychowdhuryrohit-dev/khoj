@@ -125,21 +125,21 @@ export default function ChatManager() {
         {isLoading && <LoadingBubble />}
       </div>
       <form onSubmit={handleSendMessage} className="p-4 border-t sticky bottom-0 bg-white">
-        <div className="flex">
+        <div className="flex items-center gap-4">
           <input
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            className="flex-1 p-2 border rounded-l-md"
+            className="flex-1 p-2 border rounded-md"
             placeholder="Type your message..."
             disabled={isLoading || !isConnected}
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isLoading || !isConnected || !inputMessage.trim()}
           >
-            <Send className="h-5 w-5" />
+            <Send className="h-6 w-6" />
           </button>
         </div>
       </form>
