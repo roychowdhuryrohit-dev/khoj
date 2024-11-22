@@ -146,7 +146,7 @@ export default function FileManager() {
         {files.map((file, index) => (
           <div
             key={index}
-            className={`p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative ${selectedFiles.includes(file[0]) ? 'bg-gray-300 text-gray-600' : ''
+            className={`p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative ${selectedFiles.includes(file[0]) ? 'bg-gray-300 text-gray-600' : 'bg-white'
               }`}
             onClick={() => handleFileClick(file[0])}
           >
