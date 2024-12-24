@@ -45,6 +45,6 @@ aws:
 
 python:
   module:
-    url: http://localhost:8081
+    url: ${RAG_ENDPOINT}
 
 

@@ -10,4 +10,36 @@ services:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
     ports:
       - 6379:6379
+    networks:
+      - khoj-network
 
+  khojapp:
+    container_name: khojapp
+    hostname: khojapp
+    build: ./khojapp
+    ports:
+      - 8080:8080
+    networks:
+      - khoj-network
+
+  ollama:
+    container_name: ollama
+    hostname: ollama
+    build: ./ollama
+    ports:
+      - 11434:11434
+    networks:
+      - khoj-network
+
+  rag:
+    container_name: rag
+    hostname: rag
+    build: ./rag
+    ports:
+      - 8081:8081
+    networks:
+      - khoj-network
+
+networks:
+  khoj-network:
+    driver: bridge

@@ -1,0 +1,7 @@
+fastapi[standard]==0.115.5
+llama-index==0.12.1
+llama-index-embeddings-ollama==0.4.0
+llama-index-llms-ollama==0.4.1
+llama-index-storage-chat-store-redis==0.4.0
+llama-index-vector-stores-redis==0.4.0
+python-dotenv==1.0.1

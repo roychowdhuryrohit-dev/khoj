@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Upload, RefreshCw, Download, MessageSquare } from 'lucide-react'
+import { Upload, RefreshCw, MessageSquare } from 'lucide-react'
+import DocumentViewer from './DocumentViewer'
 
 const IconButton = ({ onClick, disabled, children, className }) => (
   <button
@@ -19,25 +20,14 @@ export default function FileManager() {
   const [files, setFiles] = useState([])
   const [isUploading, setIsUploading] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [downloadingFile, setDownloadingFile] = useState(null)
   const [selectedFiles, setSelectedFiles] = useState([])
   const [isChatMode, setIsChatMode] = useState(false)
-  const [downloadReadyFiles, setDownloadReadyFiles] = useState([])
+  const [viewingFile, setViewingFile] = useState(null)
   const navigate = useNavigate()
   const fileGridRef = useRef(null)
 
   useEffect(() => {
     fetchFiles()
-    const handleClickOutside = (event) => {
-      if (fileGridRef.current && !fileGridRef.current.contains(event.target)) {
-        setDownloadReadyFiles([])
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
   }, [])
 
   const fetchFiles = async () => {
@@ -58,7 +48,7 @@ export default function FileManager() {
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0]
-    if (file && file.type === 'application/pdf') {
+    if (file) {
       setIsUploading(true)
       const formData = new FormData()
       formData.append('file', file)
@@ -87,37 +77,7 @@ export default function FileManager() {
       return
     }
 
-    if (downloadReadyFiles.includes(filename)) {
-      handleFileDownload(filename)
-    } else {
-      setDownloadReadyFiles([...downloadReadyFiles, filename])
-    }
-  }
-
-  const handleFileDownload = async (filename) => {
-    setDownloadingFile(filename)
-    try {
-      const response = await fetch(`/getPreSignedUrl?fileName=${encodeURIComponent(filename)}`)
-      if (response.ok) {
-        const { preSignedUrl } = await response.json()
-        const fileResponse = await fetch(preSignedUrl)
-        const blob = await fileResponse.blob()
-        const downloadUrl = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = downloadUrl
-        link.download = filename
-        document.body.appendChild(link)
-        link.click()
-        link.remove()
-        window.URL.revokeObjectURL(downloadUrl)
-      } else {
-        console.error('Failed to get pre-signed URL')
-      }
-    } catch (error) {
-      console.error('Error downloading file:', error)
-    }
-    setDownloadingFile(null)
-    setDownloadReadyFiles(downloadReadyFiles.filter(f => f !== filename))
+    setViewingFile(filename)
   }
 
   const toggleFileSelection = (filename) => {
@@ -136,8 +96,8 @@ export default function FileManager() {
     e.preventDefault();
     e.stopPropagation();
     setIsChatMode(!isChatMode)
-    setDownloadReadyFiles([])
     setSelectedFiles([])
+    setViewingFile(null)
   }
 
   return (
@@ -151,22 +111,16 @@ export default function FileManager() {
             onClick={() => handleFileClick(file[0])}
           >
             <p className="text-sm truncate">{file[0]}</p>
-            {downloadingFile === file[0] && (
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
-                <Download className="h-6 w-6 text-white animate-pulse" />
-              </div>
-            )}
-            {downloadReadyFiles.includes(file[0]) && !downloadingFile && (
-              <div className="absolute top-2 right-2">
-                <Download className="h-4 w-4 text-gray-500" />
-              </div>
-            )}
           </div>
         ))}
       </div>
 
       {files.length === 0 && !isRefreshing && (
-        <p className="text-center text-gray-500 mt-8">No PDF files uploaded yet.</p>
+        <p className="text-center text-gray-500 mt-8">No files uploaded yet.</p>
+      )}
+
+      {viewingFile && (
+        <DocumentViewer filename={viewingFile} onClose={() => setViewingFile(null)} />
       )}
 
       <div className="fixed bottom-4 right-4 flex items-end gap-2 p-2 bg-white bg-opacity-50 rounded-lg">
@@ -188,7 +142,6 @@ export default function FileManager() {
             <div className="relative">
               <input
                 type="file"
-                accept=".pdf"
                 onChange={handleFileUpload}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 disabled={isUploading}
@@ -206,8 +159,7 @@ export default function FileManager() {
         >
           <MessageSquare className="h-5 w-5" />
         </IconButton>
-
       </div>
-    </div >
+    </div>
   )
 }

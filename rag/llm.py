@@ -15,7 +15,6 @@ from llama_index.core.workflow import (
 
 from llama_index.vector_stores.redis import RedisVectorStore
 from llama_index.core import StorageContext
-from llama_index.core.indices.loading import load_index_from_storage
 
 from redis import Redis
 from redisvl.schema import IndexSchema
@@ -35,21 +34,23 @@ vector_dims = 0
 
 
 def init_llm(
+    ollama_host: str,
     llm_model: str,
     temp: float = 0.1,
     context_window: int = 3900,
 ) -> None:
     global llm
     llm = Ollama(
+        base_url=ollama_host,
         model=llm_model,
         temperature=temp,
         context_window=context_window,
     )
 
 
-def init_embedding(embed_model: str):
+def init_embedding(ollama_host: str, embed_model: str):
     global embedding
-    embedding = OllamaEmbedding(model_name=embed_model)
+    embedding = OllamaEmbedding(base_url=ollama_host, model_name=embed_model)
 
 
 def init_redis_client(redis_url):
@@ -103,11 +104,11 @@ def new_chat_engine(
         embed_model=embedding,
         storage_context=storage_context,
     )
-    
+
     storage_context.index_store.delete_index_struct(session_id)
     index.set_index_id(session_id)
 
-    retriever = index.as_retriever(similarity_top_k=10000)
+    # retriever = index.as_retriever(similarity_top_k=10000)
 
     # retrieve all nodes
     # all_nodes = retriever.retrieve("Whatever")
@@ -130,9 +131,11 @@ def new_chat_engine(
 
 
 def get_chat_engine(session_id: str, token_limit: int = 3000) -> BaseChatEngine:
-    
+
     storage_context = get_storage_context(session_id=session_id, overwrite=False)
-    index = VectorStoreIndex.from_vector_store(storage_context.vector_store, embed_model=embedding)
+    index = VectorStoreIndex.from_vector_store(
+        storage_context.vector_store, embed_model=embedding
+    )
     chat_memory = ChatMemoryBuffer.from_defaults(
         token_limit=token_limit,
         chat_store=chat_store,
@@ -201,8 +204,8 @@ workflow = KhojChatEngineWorkflow(timeout=100)
 def init(config):
     global verbose, workflow, vector_dims
     verbose = True if int(config["VERBOSE"]) else False
-    init_llm(llm_model=config["LLM_MODEL"])
-    init_embedding(embed_model=config["EMBED_MODEL"])
+    init_llm(ollama_host=config["OLLAMA_HOST"], llm_model=config["LLM_MODEL"])
+    init_embedding(ollama_host=config["OLLAMA_HOST"], embed_model=config["EMBED_MODEL"])
     init_redis_client(config["REDIS_URL"])
     init_chat_store(config["REDIS_URL"], config.get("TTL", None))
     vector_dims = int(config["VECTOR_DIMS"])
